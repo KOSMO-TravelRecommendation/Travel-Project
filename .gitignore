@@ -411,4 +411,5 @@ gradle-app.setting
 /.metadata/
 Server/
 
+
 /src/main/resources/application.properties

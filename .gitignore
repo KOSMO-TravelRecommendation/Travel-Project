@@ -410,3 +410,5 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/java,eclipse,maven,node,react,images,video,vagrant,gradle
 /.metadata/
 Server/
+
+/src/main/resources/application.properties

@@ -138,16 +138,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     
     <script>
-    $(document).ready(function() {
-        $('#signupLink').click(function(event) {
-            event.preventDefault();
+		$(document).ready(function() {
+		    $('#signupLink').click(function(event) {
+		        event.preventDefault();
 
-            $.get('/user/signup', function(data) {
-                $('#modalContainer').html(data);
-                $('#signupModal').modal('show');
-            });
-        });
-    });
+		        // 기존에 존재하는 모든 signupModal 제거
+		        $('#signupModal').remove();
+
+		        $.get('/user/signup', function(data) {
+		            // modalContainer에 새로운 모달 HTML 추가
+		            $('#modalContainer').html(data);
+		            
+		            // 새로 추가된 모달 표시
+		            $('#signupModal').modal('show');
+		        });
+		    });
+		});
     </script>
 </body>
 </html>

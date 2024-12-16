@@ -48,26 +48,22 @@ public class UserController {
     // 이메일 중복 체크
     @PostMapping("/check-email")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String userEmail) {
+    public String checkEmail(@RequestParam String userEmail) {
         boolean isAvailable = userService.isEmailAvailable(userEmail);
-        Map<String, Object> response = new HashMap<>();
-        response.put("isAvailable", isAvailable);
-        response.put("message", isAvailable ? "Email is available" : "Email already exists");
-        return ResponseEntity.ok(response);
+        return isAvailable ? "available" : "exists";
     }
 
     // 로그인
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<String> login(@RequestParam String userEmail, @RequestParam String userPw, 
-            HttpSession session, HttpServletResponse response) throws IOException {
+    public String login(@RequestParam String userEmail, @RequestParam String userPw, 
+            HttpSession session) {
         UserVo user = userService.login(userEmail, userPw);
         if (user != null) {
             session.setAttribute("loggedInUser", user);
-            response.sendRedirect("/");
-            return null;
+            return "success";
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return "fail";
         }
     }
 

@@ -12,12 +12,6 @@
 </head>
 
 <body>
-	<div th:if="${not #strings.isEmpty(message)}">
-	    <script th:inline="javascript">
-	        alert([[${message}]]);
-	    </script>
-	</div>
-	
 	<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
 		<div class="container">
 			<a class="navbar-brand" href="/">
@@ -30,10 +24,10 @@
 
 			<div class="collapse navbar-collapse" id="navbar">
 				<ul class="navbar-nav mr-auto">
-					<li class="nav-item active">
+					<li class="nav-item">
 						<a class="nav-link" href="/">홈</a>
 					</li>
-					<li class="nav-item">
+					<li class="nav-item active">
 						<a class="nav-link" href="/recommendation">AI 추천</a>
 					</li>
 					<li class="nav-item">
@@ -72,10 +66,10 @@
 	    <div class="container">
 	        <div class="hero-content">
 	            <h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
-	            <h1 th:if="${user != null}" th:text="${user.userName + '님, 어떤 여행을 찾고 계신가요?'}">
+	            <h1 th:if="${user != null}" th:text="${user.userName + '님을 위한 여행지 AI 추천페이지'}">
 	                사용자님, 어떤 여행을 찾고 계신가요?
 	            </h1>
-	            <p>AI 기반 맞춤 여행지 추천 서비스</p>
+	            <p>AI 추천 페이지 테스트</p>
 	            <a href="/restaurant" class="btn btn-primary btn-lg">여행 시작하기</a>
 	        </div>
 	    </div>

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,8 +39,20 @@ public class UserController {
         return "user/login";
     }
 
+    // 마이 페이지
+    @GetMapping("/mypage")
+    public String mypage(HttpSession session,Model model) {
+        UserVo user = (UserVo) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("user", user);
+        return "user/mypage";
+    }
+
+    
     // 회원가입
-    @PostMapping("/")
+    @PostMapping("/user/signup")
     public String add(@ModelAttribute UserVo bean) {
         userService.add(bean);
         return "redirect:/";

@@ -49,6 +49,17 @@ public class UserController {
         model.addAttribute("user", user);
         return "user/mypage";
     }
+    
+    // 즐겨 찾기
+    @GetMapping("/favorites")
+    public String favorite(HttpSession session,Model model) {
+        UserVo user = (UserVo) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("user", user);
+        return "user/favorites";
+    }
 
     
     // 회원가입

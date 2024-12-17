@@ -33,7 +33,7 @@
 					<li class="nav-item">
 						<a class="nav-link" href="#">여행 예약</a>
 					</li>
-					<li class="nav-item" th:if="${user != null}">
+					<li class="nav-item active" th:if="${user != null}">
 						<a class="nav-link" href="/favorites">즐겨찾기</a>
 					</li>
 				</ul>
@@ -65,11 +65,11 @@
 	<div class="hero-section">
 	    <div class="container">
 	        <div class="hero-content">
-	            <h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
-	            <h1 th:if="${user != null}" th:text="${user.userName + '님의 마이페이지 입니다.'}">
+	            <h1 th:if="${user == null}"></h1>
+	            <h1 th:if="${user != null}" th:text="${user.userName + '님의 즐겨찾기 목록 입니다.'}">
 	                사용자님, 어떤 여행을 찾고 계신가요?
 	            </h1>
-	            <p>마이 페이지 테스트</p>
+	            <p>즐겨찾기 링크 테스트</p>
 	            <a href="/restaurant" class="btn btn-primary btn-lg">여행 시작하기</a>
 	        </div>
 	    </div>

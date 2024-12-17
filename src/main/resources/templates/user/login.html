@@ -84,7 +84,9 @@ $(document).ready(function() {
 			        $('#loginModal').modal('hide');
 			        window.location.reload();  // 페이지 새로고침
 			    } else {
-			        $('#loginEmailHelp').text('이메일 또는 비밀번호가 일치하지 않습니다.').css('color', 'red');
+			        $('#loginEmailHelp').text('이메일 또는 비밀번호가 일치하지 않습니다.')
+										.removeClass('text-muted text-success')
+										.addClass('text-danger');
 			    }
 			},
 		    error: function(xhr, status, error) {

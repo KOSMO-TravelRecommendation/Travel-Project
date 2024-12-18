@@ -79,15 +79,16 @@ $(document).ready(function() {
 		        userPw: password,
 		        rememberMe: $('#rememberMe').is(':checked')
 		    },
-		    success: function(response) {
-		        if (response === 'success') {
-		            alert('로그인 성공!');
-		            $('#loginModal').modal('hide');
-		            window.location.href = '/';  // 서버에서 반환된 리다이렉트 URL로 이동
-		        } else {
-		            $('#loginEmailHelp').text('이메일 또는 비밀번호가 일치하지 않습니다.').css('color', 'red');
-		        }
-		    },
+			success: function(response) {
+			    if (response === 'success') {
+			        $('#loginModal').modal('hide');
+			        window.location.reload();  // 페이지 새로고침
+			    } else {
+			        $('#loginEmailHelp').text('이메일 또는 비밀번호가 일치하지 않습니다.')
+										.removeClass('text-muted text-success')
+										.addClass('text-danger');
+			    }
+			},
 		    error: function(xhr, status, error) {
 		        alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
 		    }

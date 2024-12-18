@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 설문조사</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <strong>Travel Picker</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"
+                aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/survey">Survey</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">여행 설문조사</h1>
+        <div id="survey-container" class="mt-4">
+
+        </div>
+        <button id="next-button" class="btn btn-primary btn-block mt-3" onclick="nextQuestion()">다음 질문</button>
+    </div>
+
+    <footer class="text-center mt-5">
+        <p>&copy; 2024 Travel Picker. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap 4 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 설문 데이터
+        const surveyQuestions = [
+    {
+        question: "몇 명이서 여행을 가나요?",
+        options: ["솔로", "커플", "3명 외 다수"]
+    },
+    {
+        question: "여행 기간은 얼마나 되나요?",
+        options: ["1~3일", "4~7일", "8일 이상"]
+    },
+    {
+        question: "귀하의 연령대는 무엇입니까?",
+        options: ["10대 이하", "20대", "30대", "40대", "50대", "60대 이상"]
+    },
+    {
+        question: "귀하의 월 소득 구간은 어떻게 되십니까?",
+        options: ["100만 원 이하", "100만 원 ~ 200만 원", "200만 원 ~ 300만 원", "300만 원 ~ 500만 원", "500만 원 이상", "소득이 없습니다"]
+    },
+    {
+        question: "여행을 계획할 때 어떤 성향이 가장 가까우십니까?",
+        options: ["철저히 계획적인 여행", "즉흥적으로 떠나는 여행", "계획과 즉흥을 혼합한 여행", "정해진 성향이 없습니다"]
+    },
+    {
+        question: "선호하는 여행 스타일은 무엇입니까?",
+        options: ["휴식 위주의 여행", "관광 명소 중심의 여행", "모험적인 여행", "문화 체험 중심의 여행", "음식 중심의 여행", "쇼핑 중심의 여행"]
+    },
+    {
+        question: "이번 여행의 주된 목적은 무엇입니까?",
+        options: ["스트레스 해소 및 휴식", "새로운 경험과 학습", "가족과의 유대 강화", "친구와 즐거운 시간 보내기", "자신만의 시간 갖기", "업무 또는 비즈니스"]
+    },
+    {
+        question: "이번 여행의 주요 동반자는 누구입니까?",
+        options: ["혼자", "배우자 또는 연인", "친구", "가족", "동료 또는 지인"]
+    },
+    {
+        question: "동반자는 몇 명입니까?",
+        options: ["1명도 없음 (혼자 여행)", "1명", "2~3명", "4명 이상"]
+    },
+    {
+        question: "10. 본인의 여행 페르소나를 선택해주세요.",
+        options: ["탐험가 (모험과 새로운 도전)", "미식가 (음식과 맛집 탐방)", "힐링러 (휴식과 힐링 선호)", "도시 탐험가 (도시 탐방과 문화 체험)", "활동가 (액티브한 여행 선호)"]
+    },
+    {
+        question: "11. 여행 중 주요 이동 수단은 무엇입니까?",
+        options: ["대중교통 (버스, 지하철)", "렌터카 또는 자가용", "자전거", "도보", "항공편", "기차 또는 KTX"]
+    }
+];
+
+
+        // 사용자의 응답 데이터
+        const surveyAnswers = [];
+
+        // 현재 질문 인덱스
+        let currentQuestionIndex = 0;
+
+        // 설문 컨테이너 및 버튼 참조
+        const surveyContainer = document.getElementById("survey-container");
+        const nextButton = document.getElementById("next-button");
+
+        // 초기 질문 표시
+        renderQuestion();
+
+        function renderQuestion() {
+            // 현재 질문 및 선택지 가져오기
+            const currentQuestion = surveyQuestions[currentQuestionIndex];
+            surveyContainer.innerHTML = `
+                <h3>${currentQuestion.question}</h3>
+                ${currentQuestion.options
+                    .map((option, index) => `
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="answer" id="option${index}" value="${option}">
+                            <label class="form-check-label" for="option${index}">${option}</label>
+                        </div>
+                    `).join("")}
+            `;
+        }
+
+        function nextQuestion() {
+            // 선택된 답변 가져오기
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) {
+                alert("옵션을 선택해주세요!");
+                return;
+            }
+
+            
+            surveyAnswers.push(selectedOption.value);
+
+            
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < surveyQuestions.length) {
+                renderQuestion();
+            } else {
+                showCompletionMessage();
+            }
+        }
+
+        function showCompletionMessage() {
+            surveyContainer.innerHTML = `
+                <h3 class="text-success text-center">설문이 완료되었습니다. 감사합니다!</h3>
+                <p class="text-center">응답 내용: ${surveyAnswers.join(", ")}</p>
+            `;
+            nextButton.style.display = "none";
+
+            
+            console.log("응답 결과 전송:", surveyAnswers);
+            
+        }
+    </script>
+</body>
+</html>

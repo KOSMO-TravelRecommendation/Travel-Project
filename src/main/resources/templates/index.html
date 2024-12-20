@@ -327,4 +327,35 @@
 
 </body>
 
+<script>
+		$(document).ready(function () {
+			//회원가입 모달
+			$('#signupLink').click(function (event) {
+				event.preventDefault();
+				// 기존에 존재하는 모든 signupModal 제거
+				$('#signupModal').remove();
+
+				$.get('/user/signup', function (data) {
+					// modalContainer에 새로운 모달 HTML 추가
+					$('#modalContainer').html(data);
+					// 새로 추가된 모달 표시
+					$('#signupModal').modal('show');
+				});
+			});
+
+			//로그인 모달
+			$('#loginLink').click(function (event) {
+				event.preventDefault();
+				// 기존에 존재하는 모든 loginModal 제거
+				$('#loginModal').remove();
+				$.get('/user/login', function (data) {
+					// modalContainer에 새로운 로그인 모달 HTML 추가
+					$('#modalContainer').html(data);
+					// 새로 추가된 로그인 모달 표시
+					$('#loginModal').modal('show');
+				});
+			});
+		});
+	</script>
+
 </html>

@@ -13,6 +13,6 @@ public class MapController {
                                @RequestParam("lat") double lat,
                                @RequestParam("lng") double lng) {
         // map 폴더 내 map.html을 반환
-        return "map/map";  // resources/templates/map/map.html을 반환
+        return "map/maptest";  // resources/templates/map/map.html을 반환
     }
 }

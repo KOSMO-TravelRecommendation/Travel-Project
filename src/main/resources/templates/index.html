@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Travel Picker 여행을 찾아드립니다.</title>
+	<title>Travel Picker</title>
 	<!-- Bootstrap 4 CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/css/index.css">
@@ -160,7 +160,6 @@
 				</div>
 			</div>
 
-
 			<!-- Footer -->
 			<footer class="footer text-center">
 				<div class="container">
@@ -212,32 +211,32 @@
 
 					// 제주도 모달
 					$('#jejuLink').click(function (event) {
-					    event.preventDefault();
-					    $('#jejuModal').remove();
-					    $.get('/local/jeju', function (data) {
-					        $('#modalContainer').empty().html(data);
-					        $('#jejuModal').modal('show');
-					    });
+						event.preventDefault();
+						$('#jejuModal').remove();
+						$.get('/local/jeju', function (data) {
+							$('#modalContainer').empty().html(data);
+							$('#jejuModal').modal('show');
+						});
 					});
 
 					// 부산 모달
 					$('#busanLink').click(function (event) {
-					    event.preventDefault();
-					    $('#busanModal').remove();
-					    $.get('/local/busan', function (data) {
-					        $('#modalContainer').empty().html(data);
-					        $('#busanModal').modal('show');
-					    });
+						event.preventDefault();
+						$('#busanModal').remove();
+						$.get('/local/busan', function (data) {
+							$('#modalContainer').empty().html(data);
+							$('#busanModal').modal('show');
+						});
 					});
 
 					// 서울 모달
 					$('#seoulLink').click(function (event) {
-					    event.preventDefault();
-					    $('#seoulModal').remove();
-					    $.get('/local/seoul', function (data) {
-					        $('#modalContainer').empty().html(data);
-					        $('#seoulModal').modal('show');
-					    });
+						event.preventDefault();
+						$('#seoulModal').remove();
+						$.get('/local/seoul', function (data) {
+							$('#modalContainer').empty().html(data);
+							$('#seoulModal').modal('show');
+						});
 					});
 				});
 

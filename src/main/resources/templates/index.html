@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 	<link rel="stylesheet" href="/css/index.css">
+	<link rel="stylesheet" href="/css/local.css">
 </head>
 
 <body>
@@ -212,44 +213,36 @@
 
 					// 제주도 모달
 					$('#jejuLink').click(function (event) {
-						event.preventDefault();
-						// 기존에 존재하는 모든 loginModal 제거
-						$('#jejuModal').remove();
-						$.get('/local/jeju', function (data) {
-							// modalContainer에 새로운 로그인 모달 HTML 추가
-							$('#modalContainer').html(data);
-							// 새로 추가된 로그인 모달 표시
-							$('#jejuModal').modal('show');
-						});
+					    event.preventDefault();
+					    $('#jejuModal').remove();
+					    $.get('/local/jeju', function (data) {
+					        $('#modalContainer').empty().html(data);
+					        $('#jejuModal').modal('show');
+					    });
 					});
 
 					// 부산 모달
 					$('#busanLink').click(function (event) {
-						event.preventDefault();
-						// 기존에 존재하는 모든 loginModal 제거
-						$('#busanModal').remove();
-						$.get('/local/busan', function (data) {
-							// modalContainer에 새로운 로그인 모달 HTML 추가
-							$('#modalContainer').html(data);
-							// 새로 추가된 로그인 모달 표시
-							$('#busanModal').modal('show');
-						});
+					    event.preventDefault();
+					    $('#busanModal').remove();
+					    $.get('/local/busan', function (data) {
+					        $('#modalContainer').empty().html(data);
+					        $('#busanModal').modal('show');
+					    });
 					});
 
 					// 서울 모달
 					$('#seoulLink').click(function (event) {
-						event.preventDefault();
-						// 기존에 존재하는 모든 loginModal 제거
-						$('#seoulModal').remove();
-						$.get('/local/seoul', function (data) {
-							// modalContainer에 새로운 로그인 모달 HTML 추가
-							$('#modalContainer').html(data);
-							// 새로 추가된 로그인 모달 표시
-							$('#seoulModal').modal('show');
-						});
+					    event.preventDefault();
+					    $('#seoulModal').remove();
+					    $.get('/local/seoul', function (data) {
+					        $('#modalContainer').empty().html(data);
+					        $('#seoulModal').modal('show');
+					    });
 					});
 				});
 
 			</script>
 </body>
+
 </html>

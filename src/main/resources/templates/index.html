@@ -226,10 +226,7 @@
 					    $('#busanModal').remove();
 					    $.get('/local/busan', function (data) {
 					        $('#modalContainer').empty().html(data);
-					        // CSS가 완전히 로드된 후에 모달을 표시
-					        setTimeout(function() {
-					            $('#busanModal').modal('show');
-					        }, 100);
+					        $('#busanModal').modal('show');
 					    });
 					});
 

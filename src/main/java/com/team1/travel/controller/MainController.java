@@ -49,5 +49,10 @@ public class MainController {
         return "survey/surveyform";
     }
     
+    @GetMapping("maptest")
+    public String maptest() {
+        return "map/maptest";
+    }
+    
 	
 }

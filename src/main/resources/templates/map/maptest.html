@@ -3,7 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지도 띄우기 테스트</title>
+    <title>Travel Picker</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 90vh;
+        }
+        #buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px;
+        }
+        #directionsBtn, #closeBtn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #directionsBtn:hover, #closeBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <h1>지도 띄우기 테스트</h1>

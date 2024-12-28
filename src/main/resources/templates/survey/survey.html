@@ -2,12 +2,25 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>여행지 추천 설문조사</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> <!-- Font Awesome -->
-    <link rel="stylesheet" href="/css/index.css"> <!-- Custom CSS -->
     <link rel="stylesheet" href="surveystyle.css"> <!-- Survey CSS -->
+    <style>
+        .hidden {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .visible {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .region-button {
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -40,7 +53,7 @@
     <!-- Survey Content -->
     <div class="container mt-5">
         <h1 class="text-center">여행지 추천 설문조사</h1>
-        <div id="survey-container" class="question-container"></div>
+        <div id="survey-container" class="question-container visible"></div>
         <div class="d-flex justify-content-between mt-3">
             <button id="back-button" class="btn btn-secondary" onclick="goBack()" style="display: none;">이전</button>
         </div>
@@ -52,236 +65,101 @@
 
 <script>
 const surveyQuestions = [
-    {
-        question: "이번 여행에서 주로 어떤 활동을 하셨나요?",
-        options: ["취식", "쇼핑 / 구매", "체험 활동 / 입장 및 관람", "단순 구경 / 산책 / 걷기", "휴식", "기타 활동", "환승/경유", "없음"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행에 함께하신 분들의 연령대는 어떠신가요?",
-        options: ["~9세 이하", "10대", "20대", "30대", "40대", "50대", "60대", "70세 이상"],
-        type: "buttons"
-    },
-    {
-        question: "체험 또는 관람 활동의 유형을 선택해주세요.",
-        options: ["체험", "입장 및 관람"],
-        type: "buttons"
-    },
-    {
-        question: "여행 중 동반자와의 동행 상황은 어떠셨나요?",
-        options: ["계속 함께 여행", "여행 중 이탈", "여행 중 합류"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행에 대한 전체적인 만족도를 선택해주세요.",
-        options: ["매우 불만족", "불만족", "보통", "만족", "매우 만족"],
-        type: "buttons"
-    },
-    {
-        question: "귀하의 최종 학력을 알려주세요.",
-        options: ["무학", "초등학교", "중학교", "고등학교", "대학(4년제 미만)", "대학교(4년제 이상)", "대학원 석사 과정", "대학원 박사 과정"],
-        type: "buttons"
-    },
-    {
-        question: "최종 학력 이수 여부를 선택해주세요.",
-        options: ["졸업", "재학", "휴학", "중퇴", "수료"],
-        type: "buttons"
-    },
-    {
-        question: "여행 중 음식 구매나 지출 상황은 어떠셨나요?",
-        options: ["이 방문지에서 구매", "이 방문지로 이동 중 구매 / 이 방문지로 배달", "여행 출발 전 거주지 인근에서 미리 구매", "비용 발생하지 않음", "비용 발생하지 않음(취식이 아닌 경우)"],
-        type: "buttons"
-    },
-    {
-        question: "귀하의 성별을 선택해주세요.",
-        options: ["남자", "여자"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행에서 머무르신 숙소의 유형은 무엇인가요?",
-        options: ["호텔", "모텔/여관", "펜션", "콘도미니엄/리조트", "야영(캠핑, 글램핑 등)", "전통 숙박시설", "게스트하우스", "민박", "자연휴양림 내 시설", "가족/친지 집", "기타", "무박 여행"],
-        type: "buttons"
-    },
-    {
-        question: "월평균 소득 수준을 선택해주세요.",
-        options: ["소득 없음", "월평균 100만원 미만", "월평균 100만원 ~ 200만원 미만", "월평균 200만원 ~ 300만원 미만", "월평균 300만원 ~ 400만원 미만", "월평균 400만원 ~ 500만원 미만", "월평균 500만원 ~ 600만원 미만", "월평균 600만원 ~ 700만원 미만", "월평균 700만원 ~ 800만원 미만", "월평균 800만원 ~ 900만원 미만", "월평균 900만원 ~ 1,000만원 미만", "월평균 1,000만원 이상"],
-        type: "buttons"
-    },
-    {
-        question: "귀하의 직업은 무엇인가요?",
-        options: ["관리자", "전문가 및 관련 종사자", "사무 종사자", "서비스 종사자", "판매 종사자", "농림어업 숙련 종사자", "기능원 및 관련 기능 종사자", "장치/기계 조작 및 조립 종사자", "단순 노무 종사자", "군인", "전업주부", "학생", "기타"],
-        type: "buttons"
-    },
-    {
-        question: "귀하의 현재 혼인 상태를 선택해주세요.",
-        options: ["미혼", "기혼", "사별", "이혼", "기타"],
-        type: "buttons"
-    },
-    {
-        question: "현재 진행 중인 메타데이터 상태를 알려주세요.",
-        options: ["사진 업로드 전", "승인 진행 중", "승인 완료", "승인 거절"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행의 주된 목적은 무엇인가요?",
-        options: ["쇼핑", "테마파크, 놀이시설, 동/식물원 방문", "역사 유적지 방문", "시티투어", "야외 스포츠, 레포츠 활동", "지역 문화예술/공연/전시시설 관람", "유흥/오락(나이트라이프)", "캠핑", "지역 축제/이벤트 참가", "온천/스파", "교육/체험 프로그램 참가", "드라마 촬영지 방문", "종교/성지 순례", "Well-ness 여행", "SNS 인생샷 여행", "호캉스 여행", "신규 여행지 발굴", "반려동물 동반 여행", "인플루언서 따라하기 여행", "친환경 여행(플로깅 여행)", "등반 여행"],
-        type: "buttons"
-    },
-    {
-        question: "여행 중 사용하신 주요 이동 수단은 무엇인가요?",
-        options: ["관광버스", "시외/고속버스", "시내/마을버스", "자전거", "도보", "기타", "버스 + 지하철", "자가용(승용/승합/트럭 등)", "렌터카(승용/승합/버스 등)", "캠핑카(자차 및 렌탈)", "택시", "지하철", "고속전철(ITX 등)", "KTX/SRT(고속열차)", "새마을/무궁화열차", "항공기", "배/선박"],
-        type: "buttons"
-    },
-    {
-        question: "결제 방식은 무엇을 사용하셨나요?",
-        options: ["카드 일시불", "카드 할부", "현금", "기타", "계좌이체"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행을 다른 분께 추천할 의향은 어떠신가요?",
-        options: ["전혀 그렇지 않다", "그렇지 않다", "보통", "그렇다", "매우 그렇다"],
-        type: "buttons"
-    },
-    {
-        question: "방문지를 선택하신 이유는 무엇인가요?",
-        options: ["지명도/명소/핫플레이스", "온라인(SNS, 블로그 등) 평가가 좋아서", "미디어(TV 정보 프로그램 등) 평가가 좋아서", "과거 경험이 좋아서", "지인의 추천이 있어서", "가기 편해서/교통이 좋아서", "편의시설/서비스가 좋아서", "가성비가 좋아서", "지나가다 우연히", "교육성이 좋아서", "기타"],
-        type: "buttons"
-    },
-    {
-        question: "이번 방문지에 다시 방문할 의향은 어떠신가요?",
-        options: ["전혀 그렇지 않다", "그렇지 않다", "보통", "그렇다", "매우 그렇다"],
-        type: "buttons"
-    },
-    {
-        question: "이번 방문지가 처음이신가요, 아니면 재방문이신가요?",
-        options: ["처음 방문", "재방문"],
-        type: "buttons"
-    },
-    {
-        question: "여행 진행 상태를 알려주세요.",
-        options: ["최초 로그인", "테스트 사진 업로드", "예정여행지변경신청", "예정여행지변경승인", "여행 중", "여행 후(기록전)", "여행 기록 입력 중", "여행 기록 입력 완료", "여행 기록 보완 요청", "여행 기록 보완 완료"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행 지역은 어디인가요?",
-        options: ["서울", "인천", "경기", "강원", "대구", "경북", "부산", "울산", "경남", "광주", "전북", "전남", "대전", "충북", "충남", "세종", "제주", "도서지역"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행에서 동반자와의 관계는 무엇인가요?",
-        options: ["배우자", "자녀", "부모", "조부모", "형제/자매", "친인척", "친구", "연인", "동료", "친목 단체/모임(동호회, 종교단체 등)", "기타"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행을 계획한 주된 동기는 무엇인가요?",
-        options: ["일상적인 환경 및 역할에서의 탈출, 지루함 탈피", "쉴 수 있는 기회, 육체 피로 해결 및 정신적인 휴식", "여행 동반자와의 친밀감 및 유대감 증진", "진정한 자아 찾기 또는 자신을 되돌아볼 기회 찾기", "SNS 사진 등록 등 과시", "운동, 건강 증진 및 충전", "새로운 경험 추구", "역사 탐방, 문화적 경험 등 교육적 동기", "특별한 목적(칠순여행, 신혼여행, 수학여행, 인센티브여행)", "기타"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행에서 선호하셨던 스타일은 어떤가요?",
-        options: ["자연 선호 매우선호", "자연 선호 중간선호", "자연 선호 약간선호", "중립", "도시 선호 약간선호", "도시 선호 중간선호", "도시 선호 매우선호"],
-        type: "buttons"
-    },
-    {
-        question: "여행 빈도는 보통 어느 정도 되시나요?",
-        options: ["1주일", "한달", "1년", "기타"],
-        type: "buttons"
-    },
-    {
-        question: "이번 여행에서 방문하신 곳의 유형은 무엇인가요?",
-        options: ["집", "친구/친지집", "사무실", "숙소", "체험 활동 관광지", "자연관광지", "역사/유적/종교 시설(문화재, 박물관, 촬영지, 절 등)", "문화 시설(공연장, 영화관, 전시관 등)", "상업지구(거리, 시장, 쇼핑시설)", "레저/스포츠 관련 시설(스키, 카트, 수상레저)", "테마시설(놀이공원, 워터파크)", "산책로, 둘레길 등", "지역 축제/행사", "역, 터미널, 고속도로 휴게소", "상점", "식당/카페", "기타"],
-        type: "buttons"
-    }
+    { question: "이번 여행에서 주로 어떤 활동을 하셨나요?", options: ["취식", "쇼핑", "체험", "기타"], type: "buttons" },
+    { question: "이번 여행에 함께하신 분들의 연령대는 어떠신가요?", options: ["~9세", "10대", "20대", "기타"], type: "buttons" },
+    { question: "체험 또는 관람 활동의 유형을 선택해주세요.", options: ["체험", "입장 및 관람"], type: "buttons" }
 ];
 
-        const surveyAnswers = [];
-        let currentQuestionIndex = 0;
+const surveyAnswers = [];
+let currentQuestionIndex = 0;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderQuestion();
-        });
+document.addEventListener("DOMContentLoaded", () => {
+    renderQuestion();
+});
 
-        function renderQuestion() {
-            const surveyContainer = document.getElementById("survey-container");
-            const currentQuestion = surveyQuestions[currentQuestionIndex];
+function renderQuestion() {
+    const surveyContainer = document.getElementById("survey-container");
+    const currentQuestion = surveyQuestions[currentQuestionIndex];
 
-            surveyContainer.classList.add("hidden"); // 페이드 아웃
+    surveyContainer.classList.remove("visible");
+    surveyContainer.classList.add("hidden");
 
-            setTimeout(() => {
-                surveyContainer.innerHTML = `
-                    <h3>${currentQuestion.question}</h3>
-                    <div class="btn-group d-flex flex-wrap">
-                        ${currentQuestion.options.map(option => `
-                            <button class="region-button" data-value="${option}" onclick="selectOption('${option}')">${option}</button>
-                        `).join("")}
-                    </div>
-                `;
-                surveyContainer.classList.remove("hidden"); // 페이드 인
+    setTimeout(() => {
+        surveyContainer.innerHTML = `
+            <h3>${currentQuestion.question}</h3>
+            <div class="btn-group d-flex flex-wrap">
+                ${currentQuestion.options.map(option => `
+                    <button class="btn btn-primary region-button" data-value="${option}" onclick="selectOption('${option}')">${option}</button>
+                `).join("")}
+            </div>
+        `;
+        surveyContainer.classList.remove("hidden");
+        surveyContainer.classList.add("visible");
 
-                // "이전" 버튼 보이기/숨기기
-                const backButton = document.getElementById("back-button");
-                if (currentQuestionIndex > 0) {
-                    backButton.style.display = "block";
-                } else {
-                    backButton.style.display = "none";
-                }
-            }, 500); // 페이드 아웃 후 500ms 대기
-        }
+        const backButton = document.getElementById("back-button");
+        backButton.style.display = currentQuestionIndex > 0 ? "block" : "none";
+    }, 500);
+}
 
-        function selectOption(option) {
-            surveyAnswers[currentQuestionIndex] = option;
-            currentQuestionIndex++;
+function selectOption(option) {
+    surveyAnswers[currentQuestionIndex] = option;
+    currentQuestionIndex++;
 
-            if (currentQuestionIndex < surveyQuestions.length) {
-                renderQuestion();
+    if (currentQuestionIndex < surveyQuestions.length) {
+        renderQuestion();
+    } else {
+        sendSurveyResults();
+    }
+}
+
+function goBack() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+    }
+}
+
+async function sendSurveyResults() {
+    if (!validateAnswers()) return;
+
+    const endpoint = "http://localhost:8080/api/survey-submit"; // 실제 엔드포인트로 변경 필요
+    const surveyContainer = document.getElementById("survey-container");
+
+    surveyContainer.classList.add("hidden");
+
+    setTimeout(async () => {
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ answers: surveyAnswers })
+            });
+
+            if (response.ok) {
+                window.location.href = "/survey-result"; // 결과 페이지로 이동
             } else {
-                sendSurveyResults();
+                throw new Error("설문 결과 전송에 실패했습니다.");
             }
+        } catch (error) {
+            console.error("오류 발생:", error);
+            surveyContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    오류가 발생했습니다: ${error.message}
+                </div>
+            `;
         }
 
-        function goBack() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                renderQuestion();
-            }
-        }
+        surveyContainer.classList.remove("hidden");
+    }, 500);
+}
 
-        async function sendSurveyResults() {
-            const endpoint = "https://your-api-endpoint.com/survey";
-            const surveyContainer = document.getElementById("survey-container");
-
-            surveyContainer.classList.add("hidden");
-
-            setTimeout(async () => {
-                try {
-                    const response = await fetch(endpoint, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ answers: surveyAnswers }),
-                    });
-
-                    if (response.ok) {
-                        surveyContainer.innerHTML = `
-                            <div class="alert alert-success">
-                                설문 결과가 성공적으로 전송되었습니다. 감사합니다!
-                            </div>
-                        `;
-                    } else {
-                        throw new Error("설문 결과 전송에 실패했습니다.");
-                    }
-                } catch (error) {
-                    surveyContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            오류가 발생했습니다: ${error.message}
-                        </div>
-                    `;
-                }
-
-                surveyContainer.classList.remove("hidden");
-            }, 500);
-        }
-    </script>
+function validateAnswers() {
+    if (surveyAnswers.some(answer => !answer)) {
+        alert("모든 질문에 답변을 선택해주세요.");
+        return false;
+    }
+    return true;
+}
+</script>
 </body>
 </html>

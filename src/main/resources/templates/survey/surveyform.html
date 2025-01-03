@@ -6,7 +6,6 @@
     <title>여행지 추천 플랫폼</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
     <!-- Survey Modal -->
@@ -14,16 +13,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="surveyModalLabel">나의 여행 성향</h5>
+                    <h5 class="modal-title" id="surveyModalLabel">AI를 이용한 여행지 추천</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="surveyForm">
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
                         <div id="survey-container"></div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                            <button type="button" class="btn btn-info" id="prev-button" onclick="prevQuestion()" style="display: none;">이전</button>
                             <button type="button" class="btn btn-primary" id="next-button" onclick="nextQuestion()">다음</button>
                         </div>
                     </form>
@@ -32,7 +35,7 @@
         </div>
     </div>
 
-	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
@@ -40,14 +43,45 @@
     <script>
         const surveyQuestions = [
             {
-                question: "몇 명이서 여행을 가나요?",
-                options: ["솔로", "커플", "3명 외 다수"]
+                question: "이동수단은 무엇을 이용하시나요?",
+                options: ["자가용", "버스", "택시", "기차", "버스+지하철", "기타"],
+                type: "dropdown" 
             },
             {
-                question: "여행 기간은 얼마나 되나요?",
-                options: ["1~3일", "4~7일", "8일 이상"]
+                question: "성별은 어떻게 되시나요?",
+                options: ["남성", "여성"],
+                type: "radio" 
             },
-            // ... 나머지 질문들 동일하게 유지
+            {
+                question: "연령대는 어떻게 되시나요?",
+                options: ["10대", "20대", "30대", "40대", "50대", "60대", "70대이상"],
+                type: "dropdown"
+            },
+            {
+                question: "동반자 수는 어떻게 되시나요?",
+                options: ["혼자", "1명", "2명", "3명", "4명", "5명", "6명", "7명", "8명", "9명", "10명", "11명이상"],
+                type: "dropdown"
+            },
+            {
+                question: "원하는 여행 스타일을 선택해주세요",
+                options: ["쇼핑", "테마파크", "놀이시설", "동/식물원 방문", "역사 유적지 방문",
+				 "시티투어", "야외 스포츠", "레포츠 활동", "지역 문화예술/공연/전시시설 관람", 
+				 "유흥/오락(나이트라이프)", "캠핑", "지역 축제/이벤트 참가", "온천/스파", "교육/체험 프로그램 참가",
+				  "드라마 촬영지 방문", "종교/성지 순례", "Well-ness 여행", "SNS 인생샷 여행", "호캉스 여행",
+				   "신규 여행지 발굴", "반려동물 동반 여행", "인플루언서 따라하기 여행", "친환경 여행(플로깅 여행)",
+				    "등반 여행"],
+                type: "dropdown"
+            },
+            {
+                question: "여행 예산은 어떻게 되나요?",
+                options: ["10만원 이하", "10만원 ~ 20만원", "20만원 ~ 50만원", "50만원 ~ 100만원", "100만원 이상"],
+                type: "dropdown"
+            },
+            {
+                question: "여행 기간은 어떻게 되나요?",
+                options: ["당일치기", "1박2일", "2박3일", "그 이상"],
+                type: "radio"
+            }
         ];
 
         let currentQuestionIndex = 0;
@@ -56,16 +90,40 @@
         function renderQuestion() {
             const currentQuestion = surveyQuestions[currentQuestionIndex];
             const container = document.getElementById("survey-container");
+            const progress = (currentQuestionIndex / surveyQuestions.length) * 100;
+            
+            // 진행률 업데이트
+            $('.progress-bar').css('width', `${progress}%`).attr('aria-valuenow', progress);
+            
+            // 이전 버튼 표시 여부
+            document.getElementById("prev-button").style.display = 
+                currentQuestionIndex > 0 ? "block" : "none";
+
+            let optionsHTML;
+            if (currentQuestion.type === 'dropdown') {
+                optionsHTML = `
+                    <select class="form-control" name="surveyAnswer">
+                        <option value="">선택해주세요</option>
+                        ${currentQuestion.options.map(option => 
+                            `<option value="${option}" ${surveyAnswers[currentQuestionIndex] === option ? 'selected' : ''}>${option}</option>`
+                        ).join("")}
+                    </select>
+                `;
+            } else {
+                optionsHTML = currentQuestion.options.map((option, index) => `
+                    <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" id="option${index}" 
+                            name="surveyAnswer" value="${option}" 
+                            ${surveyAnswers[currentQuestionIndex] === option ? 'checked' : ''}>
+                        <label class="custom-control-label" for="option${index}">${option}</label>
+                    </div>
+                `).join("");
+            }
             
             container.innerHTML = `
                 <div class="form-group">
                     <label class="font-weight-bold">${currentQuestion.question}</label>
-                    ${currentQuestion.options.map((option, index) => ` 
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" id="option${index}" name="surveyAnswer" value="${option}">
-                            <label class="custom-control-label" for="option${index}">${option}</label>
-                        </div>
-                    `).join("")}
+                    ${optionsHTML}
                     <small id="surveyHelp" class="form-text text-danger"></small>
                 </div>
             `;
@@ -75,8 +133,18 @@
             nextButton.textContent = currentQuestionIndex === surveyQuestions.length - 1 ? "제출" : "다음";
         }
 
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
         function nextQuestion() {
-            const selectedOption = document.querySelector('input[name="surveyAnswer"]:checked');
+            const selectedOption = currentQuestionIndex < surveyQuestions.length 
+                ? document.querySelector('select[name="surveyAnswer"]')?.value || 
+                  document.querySelector('input[name="surveyAnswer"]:checked')?.value
+                : null;
             const surveyHelp = document.getElementById("surveyHelp");
 
             if (!selectedOption) {
@@ -85,7 +153,7 @@
             }
 
             surveyHelp.textContent = "";
-            surveyAnswers.push(selectedOption.value);
+            surveyAnswers[currentQuestionIndex] = selectedOption;
 
             if (currentQuestionIndex < surveyQuestions.length - 1) {
                 currentQuestionIndex++;
@@ -95,23 +163,31 @@
             }
         }
 
-		function submitSurvey() {
-		    // Axios를 사용하여 JSON 형식으로 데이터를 전송
-		    axios.post('/submitSurvey', {
-		        inputs: surveyAnswers  // surveyAnswers 배열을 서버로 전송
-		    })
-		    .then(response => {
-		        alert('설문이 성공적으로 제출되었습니다!');
-		        // 서버로부터 받은 응답을 화면에 바로 표시
-		        document.getElementById("survey-result").innerText = response.data;
-		        // 모달을 숨긴 후 페이지 새로 고침
-		        $('#surveyModal').modal('hide');
-		        location.reload();  // 페이지 새로 고침
-		    })
-		    .catch(error => {
-		        alert('설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
-		    });
-		}
+        function submitSurvey() {
+            const submitButton = document.getElementById("next-button");
+            submitButton.disabled = true;
+            submitButton.textContent = "처리중...";
+
+            axios.post('http://localhost:8080/api/survey/submit', {
+                inputs: surveyAnswers
+            })
+            .then(response => {
+                console.log('Survey response:', response.data);
+                if (response.data.status === 'success') {
+                    alert('설문이 성공적으로 제출되었습니다!');
+                    $('#surveyModal').modal('hide');
+                    window.location.href = 'http://localhost:3000/survey-results';
+                }
+            })
+            .catch(error => {
+                console.error('Survey submission error:', error);
+                alert('설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = "제출";
+            });
+        }
 
         function resetSurvey() {
             currentQuestionIndex = 0;
@@ -129,8 +205,5 @@
             resetSurvey();
         });
     </script>
-
-    <div id="survey-result"></div> <!-- 결과 표시 영역 -->
-
 </body>
 </html>

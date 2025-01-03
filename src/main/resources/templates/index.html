@@ -91,7 +91,7 @@
 					<i class="fas fa-map-marked-alt"></i>
 					<h4>인기 여행지</h4>
 					<p>가장 추천받는 국내 여행지를 소개합니다.</p>
-					<a href="features/place" class="btn btn-outline-primary">더 알아보기</a>
+					<a href="features/place" id="destinationLink" class="btn btn-outline-primary">더 알아보기</a>
 				</div>
 			</div>
 			<div class="col-md-4">
@@ -99,7 +99,7 @@
 					<i class="fas fa-magic"></i>
 					<h4>AI 추천</h4>
 					<p>취향에 딱 맞는 여행지를 AI가 찾아드려요.</p>
-					<a href="#" class="btn btn-outline-primary">AI 추천 받기</a>
+					<a href="recommendation" class="btn btn-outline-primary">AI 추천 받기</a>
 				</div>
 			</div>
 			<div class="col-md-4">
@@ -242,6 +242,23 @@
 						});
 					});
 				});
+				// "더 알아보기" 버튼 클릭 시 모달 열기
+				$('#destinationLink').click(function(event) {
+				    event.preventDefault();  // 기본 링크 동작 방지
+
+				    // 기존에 열린 모달 제거 (중복 방지)
+				    $('#destinationModal').remove();
+
+				    // 서버에서 /features/place HTML을 받아옴
+				    $.get('/features/place', function(data) {
+				        // 받아온 HTML을 modalContainer에 추가
+				        $('#modalContainer').html(data);
+				        
+				        // 모달 열기
+				        $('#destinationModal').modal('show');
+				    });
+				});
+
 
 			</script>
 </body>

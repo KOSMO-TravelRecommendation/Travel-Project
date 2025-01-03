@@ -1,26 +1,24 @@
 package com.team1.travel.controller;
 
-import com.team1.travel.model.SurveyRequestDto;
-import com.team1.travel.service.SurveyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
 
-@RestController
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
 public class SurveyController {
 
-    @Autowired
-    private SurveyService surveyService;
-    
-    @PostMapping("/submit-survey")
-    public String submitSurvey(@RequestBody SurveyRequestDto surveyRequestDto) {
-        boolean success = surveyService.saveSurvey(surveyRequestDto);
-
-        if (success) {
-            return "redirect:/recommendation";
-        } else {
-            return "redirect:/error";
-        }
+    @GetMapping("/survey/form")
+    public String surveyForm() {
+        return "survey/surveyform";  // HTML 뷰를 반환
     }
+    
+//    @PostMapping("/survey/submitForm")
+//    public String submitSurvey(@RequestBody List<String> answers) {
+//        System.out.println("설문 응답: " + answers);
+//        return "설문이 성공적으로 제출되었습니다!";
+//    }
 }

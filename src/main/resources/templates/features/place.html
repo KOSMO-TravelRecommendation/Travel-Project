@@ -68,101 +68,10 @@
 			</div>
 		</div>
 	</nav>
-
-	<!-- Hero Section -->
-	<div class="hero-section">
-		<div class="container">
-			<div class="hero-content">
-				<h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
-				<h1 th:if="${user != null}" th:text="${user.userName + '님, 어떤 여행을 찾고 계신가요?'}">
-					사용자님, 어떤 여행을 찾고 계신가요?
-				</h1>
-				<p>AI 기반 맞춤 여행지 추천 서비스</p>
-				<a href="/restaurant" class="btn btn-primary btn-lg">여행 시작하기</a>
-			</div>
-		</div>
-	</div>
-
-	<!-- Features Section -->
-	<div class="container">
-		<div class="row">
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-map-marked-alt"></i>
-					<h4>인기 여행지</h4>
-					<p>가장 추천받는 국내 여행지를 소개합니다.</p>
-					<a href="features/place" class="btn btn-outline-primary">더 알아보기</a>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-magic"></i>
-					<h4>AI 추천</h4>
-					<p>취향에 딱 맞는 여행지를 AI가 찾아드려요.</p>
-					<a href="#" class="btn btn-outline-primary">AI 추천 받기</a>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-globe-americas"></i>
-					<h4>최신 여행지</h4>
-					<p>새롭게 등록된 숨은 명소를 발견하세요.</p>
-					<a href="#" class="btn btn-outline-primary">둘러보기</a>
-				</div>
-			</div>
-		</div>
-
-		<!-- Travel Cards Section -->
-		<div class="card-section">
-			<h3 class="text-center mb-4">Travel Picker의 추천!</h3>
-			<div class="container">
-				<div class="row">
-				
-					<!-- 제주도 카드 -->
-					<div class="col-md-4">
-						<div class="card travel-card">
-							<img src="https://img1.newsis.com/2022/06/26/NISI20220626_0018959695_web.jpg"
-								class="card-img-top">
-							<div class="card-body">
-								<h4 class="card-title text-center">제주도</h4>
-								<p class="card-text text-center">자연과 함께하는 힐링 여행</p>
-								<a href="#" id="jejuLink" class="btn btn-primary d-block mx-auto" data-toggle="modal"
-									data-target="#jejuModal">상세 정보</a>
-							</div>
-						</div>
-					</div>
-
-					<!-- 부산 카드 -->
-					<div class="col-md-4">
-						<div class="card travel-card">
-							<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR641qLhumQ2zzEy33g1ft-iFp3Xshi4zAcIg&s"
-								class="card-img-top">
-							<div class="card-body">
-								<h4 class="card-title text-center">부산</h4>
-								<p class="card-text text-center">바다와 도시의 매력이 공존하는 곳</p>
-								<a href="#" id="busanLink" class="btn btn-primary d-block mx-auto" data-toggle="modal"
-									data-target="#busanModal">상세 정보</a>
-							</div>
-						</div>
-					</div>
-
-					<!-- 서울 카드 -->
-					<div class="col-md-4">
-						<div class="card travel-card">
-							<img src="https://econmingle.com/wp-content/uploads/2024/11/the-phenomenon-of-avoiding-Seoul-001-1024x683.jpg"
-								class="card-img-top">
-							<div class="card-body">
-								<h4 class="card-title text-center">서울</h4>
-								<p class="card-text text-center">현대와 전통이 공존하는 도시</p>
-								<a href="#" id="seoulLink" class="btn btn-primary d-block mx-auto" data-toggle="modal"
-									data-target="#seoulModal">상세 정보</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Footer -->
+	
+	
+	
+	<!-- Footer -->
 			<footer class="footer text-center">
 				<div class="container">
 					<p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
@@ -172,8 +81,10 @@
 						<a href="#" class="text-white mx-2"><i class="fab fa-twitter"></i></a>
 					</div>
 				</div>
+				
+					
 			</footer>
-
+			
 			<!-- Modal Container -->
 			<div id="modalContainer"></div>
 
@@ -211,39 +122,13 @@
 							$('#loginModal').modal('show');
 						});
 					});
-
-					// 제주도 모달
-					$('#jejuLink').click(function (event) {
-						event.preventDefault();
-						$('#jejuModal').remove();
-						$.get('/local/jeju', function (data) {
-							$('#modalContainer').empty().html(data);
-							$('#jejuModal').modal('show');
-						});
-					});
-
-					// 부산 모달
-					$('#busanLink').click(function (event) {
-						event.preventDefault();
-						$('#busanModal').remove();
-						$.get('/local/busan', function (data) {
-							$('#modalContainer').empty().html(data);
-							$('#busanModal').modal('show');
-						});
-					});
-
-					// 서울 모달
-					$('#seoulLink').click(function (event) {
-						event.preventDefault();
-						$('#seoulModal').remove();
-						$.get('/local/seoul', function (data) {
-							$('#modalContainer').empty().html(data);
-							$('#seoulModal').modal('show');
-						});
-					});
+					
 				});
-
 			</script>
-</body>
+			
+			
+			
+			
+			</body>
 
 </html>

@@ -22,4 +22,16 @@ public class LocalController {
     public String getSeoulPage(Model model) {
         return "local/seoul";  // templates/local/seoul.html로 렌더링
     }
+    @GetMapping("/local/gwangju")
+    public String getGwangjuPage(Model model) {
+        return "local/gwangju";
+    }
+    @GetMapping("/local/incheon")
+    public String getincheonPage(Model model) {
+        return "local/incheon";
+    }
+    @GetMapping("/local/ulsan")
+    public String getulsanPage(Model model) {
+        return "local/ulsan";
+    }
 }

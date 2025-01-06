@@ -77,7 +77,7 @@
                   "드라마 촬영지 방문", "종교/성지 순례", "Well-ness 여행", "SNS 인생샷 여행", "호캉스 여행",
                    "신규 여행지 발굴", "반려동물 동반 여행", "인플루언서 따라하기 여행", "친환경 여행(플로깅 여행)",
                     "등반 여행"],
-                type: "dropdown"
+                type: "checkbox"
             },
             {
                 question: "여행 기간은 어떻게 되나요?",
@@ -136,7 +136,7 @@
             let optionsHTML;
             if (currentQuestion.type === 'linked-dropdowns') {
                 const savedAnswer = surveyAnswers[currentQuestionIndex] || {};
-                optionsHTML = `
+                optionsHTML = ` 
                     <div class="form-group">
                         <select class="form-control mb-2" id="regionsDropdown" onchange="handleRegionChange(event)">
                             <option value="">권역을 선택해주세요</option>
@@ -148,12 +148,21 @@
                             <option value="">지역을 선택해주세요</option>
                             ${savedAnswer.region ? currentQuestion.regions[savedAnswer.region].map(city => 
                                 `<option value="${city}" ${savedAnswer.city === city ? 'selected' : ''}>${city}</option>`
-                            ).join("") : ''}
+                            ).join("") : ''} 
                         </select>
                     </div>
                 `;
+            } else if (currentQuestion.type === 'checkbox') {
+                optionsHTML = currentQuestion.options.map((option, index) => `
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="option${index}" 
+                            name="surveyAnswer" value="${option}" 
+                            ${surveyAnswers[currentQuestionIndex] && surveyAnswers[currentQuestionIndex].includes(option) ? 'checked' : ''}>
+                        <label class="custom-control-label" for="option${index}">${option}</label>
+                    </div>
+                `).join("");
             } else if (currentQuestion.type === 'dropdown') {
-                optionsHTML = `
+                optionsHTML = ` 
                     <select class="form-control" name="surveyAnswer">
                         <option value="">선택해주세요</option>
                         ${currentQuestion.options.map(option => 
@@ -179,7 +188,7 @@
                     <small id="surveyHelp" class="form-text text-danger"></small>
                 </div>
             `;
-
+            
             const nextButton = document.getElementById("next-button");
             nextButton.textContent = currentQuestionIndex === surveyQuestions.length - 1 ? "제출" : "다음";
         }
@@ -205,6 +214,12 @@
                     return;
                 }
                 selectedValue = { region: selectedRegion, city: selectedCity };
+            } else if (currentQuestion.type === 'checkbox') {
+                selectedValue = Array.from(document.querySelectorAll('input[name="surveyAnswer"]:checked')).map(input => input.value);
+                if (selectedValue.length === 0) {
+                    surveyHelp.textContent = "여행 스타일을 선택해주세요!";
+                    return;
+                }
             } else {
                 selectedValue = document.querySelector('select[name="surveyAnswer"]')?.value || 
                               document.querySelector('input[name="surveyAnswer"]:checked')?.value;
@@ -231,12 +246,12 @@
             submitButton.disabled = true;
             submitButton.textContent = "처리중...";
 
-			const processedAnswers = surveyAnswers.map(answer => {
-			    if (typeof answer === 'object' && answer.region && answer.city) {
-			        return `${answer.region}, ${answer.city}`; // region과 city를 함께 전송
-			    }
-			    return answer;
-			});
+            const processedAnswers = surveyAnswers.map(answer => {
+                if (typeof answer === 'object' && answer.city) {
+                    return `${answer.city}`;
+                }
+                return answer;
+            });
 
             axios.post('http://localhost:8080/api/survey/submit', {
                 inputs: processedAnswers
@@ -271,6 +286,10 @@
 
         $('#surveyModal').on('hidden.bs.modal', function () {
             resetSurvey();
+        });
+
+        $(document).ready(function() {
+            $('#surveyModal').modal('show');
         });
     </script>
 </body>

@@ -15,10 +15,5 @@ public class SurveyController {
     public String surveyForm() {
         return "survey/surveyform";  // HTML 뷰를 반환
     }
-    
-//    @PostMapping("/survey/submitForm")
-//    public String submitSurvey(@RequestBody List<String> answers) {
-//        System.out.println("설문 응답: " + answers);
-//        return "설문이 성공적으로 제출되었습니다!";
-//    }
+
 }

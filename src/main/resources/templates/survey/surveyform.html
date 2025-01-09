@@ -70,15 +70,20 @@
                 type: "dropdown"
             },
             {
-                question: "원하는 여행 스타일을 선택해주세요 (정확한 학습을 위해 최대 3개까지 설정 가능합니다)",
-                options: ["쇼핑", "테마파크", "놀이시설", "동/식물원 방문", "역사 유적지 방문",
-                 "시티투어", "야외 스포츠", "레포츠 활동", "지역 문화예술/공연/전시시설 관람", 
-                 "유흥/오락(나이트라이프)", "캠핑", "지역 축제/이벤트 참가", "온천/스파", "교육/체험 프로그램 참가",
-                  "드라마 촬영지 방문", "종교/성지 순례", "Well-ness 여행", "SNS 인생샷 여행", "호캉스 여행",
-                   "신규 여행지 발굴", "반려동물 동반 여행", "인플루언서 따라하기 여행", "친환경 여행(플로깅 여행)",
-                    "등반 여행"],
-                type: "checkbox",
-                maxChecked: 3
+                question: "원하는 여행 스타일을 선택해주세요",
+				options: [
+				  "일상에서 벗어나 새로운 환경을 즐기는 여행",
+				  "휴식을 통해 몸과 마음을 회복하는 여행",
+				  "여행 메이트와 추억을 쌓고 유대감을 키우는 여행",
+				  "자신을 돌아보고 진정한 자아를 찾는 여행",
+				  "SNS에 공유하며 특별한 순간을 남기는 여행",
+				  "운동과 건강을 챙기며 활력을 얻는 여행",
+				  "새롭고 신나는 경험을 찾아 떠나는 여행",
+				  "역사와 문화를 배우며 탐방하는 여행",
+				  "특별한 목적을 위한 기념 여행 (칠순, 신혼, 수학여행 등)",
+				  "기타, 나만의 특별한 여행 스타일"
+				],
+                type: "dropdown"
             },
             {
                 question: "여행 기간은 어떻게 되나요?",
@@ -105,6 +110,7 @@
             const citiesDropdown = document.getElementById('citiesDropdown');
             const surveyHelp = document.getElementById("surveyHelp");
             
+            // 선택된 권역의 도시들로 두 번째 드롭다운 업데이트
             citiesDropdown.innerHTML = '<option value="">선택해주세요</option>';
             if (selectedRegion) {
                 regionData[selectedRegion].forEach(city => {
@@ -115,23 +121,12 @@
                 citiesDropdown.disabled = true;
             }
             
+            // 이미 저장된 답변이 있다면 복원
             if (surveyAnswers[currentQuestionIndex] && surveyAnswers[currentQuestionIndex].city) {
                 citiesDropdown.value = surveyAnswers[currentQuestionIndex].city;
             }
             
             surveyHelp.textContent = "";
-        }
-
-        function handleCheckboxChange(event) {
-            const currentQuestion = surveyQuestions[currentQuestionIndex];
-            const checkedBoxes = document.querySelectorAll('input[name="surveyAnswer"]:checked');
-            
-            if (checkedBoxes.length > currentQuestion.maxChecked) {
-                event.target.checked = false;
-                document.getElementById("surveyHelp").textContent = `최대 ${currentQuestion.maxChecked}개까지만 선택 가능합니다.`;
-            } else {
-                document.getElementById("surveyHelp").textContent = "";
-            }
         }
 
         function renderQuestion() {
@@ -168,7 +163,6 @@
                     <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="option${index}" 
                             name="surveyAnswer" value="${option}" 
-                            onchange="handleCheckboxChange(event)"
                             ${surveyAnswers[currentQuestionIndex] && surveyAnswers[currentQuestionIndex].includes(option) ? 'checked' : ''}>
                         <label class="custom-control-label" for="option${index}">${option}</label>
                     </div>

@@ -42,12 +42,21 @@
 
     <script>
         const regionData = {
-            "수도권": ["서울", "인천", "경기도"],
-            "중부권": ["전북", "전남", "충북", "충남", "광주", "대전", "세종"],
+            "수도권": ["서울", "인천", "경기"],
+            "서부권": ["전북", "전남", "충북", "충남", "광주", "대전", "세종"],
             "동부권": ["부산", "대구", "울산", "경남", "경북", "강원"],
             "도서지역": ["제주도"]
         };
 
+        // 지역별 모델 매핑 추가
+        const regionToModel = {
+            "수도권": "CAPITAL",
+            "중부권": "WEST",
+            "동부권": "EAST",
+            "도서지역": "JEJU"
+        };
+
+        // 나머지 코드는 동일
         const surveyQuestions = [
             {
                 question: "여행하고 싶은 지역을 선택해주세요",
@@ -61,28 +70,37 @@
             },
             {
                 question: "연령대는 어떻게 되시나요?",
-                options: ["10대", "20대", "30대", "40대", "50대", "60대", "70대 이상"],
+                options: ["20대", "30대", "40대", "50대", "60대 이상"],
                 type: "dropdown"
             },
             {
                 question: "동반자 수는 어떻게 되시나요?",
-                options: ["혼자", "1명", "2명", "3명", "4명", "5명", "6명", "7명", "8명", "9명", "10명", "11명 이상"],
+                options: ["혼자", "1명", "2명", "3명", "4명 이상"],
+                type: "dropdown"
+            },
+            {
+                question: "동반자 유형은 어떻게 되시나요?",
+                options: ["혼자", "연인", "가족", "친구", "단체"],
                 type: "dropdown"
             },
             {
                 question: "원하는 여행 스타일을 선택해주세요",
-				options: [
-				  "일상에서 벗어나 새로운 환경을 즐기는 여행",
-				  "휴식을 통해 몸과 마음을 회복하는 여행",
-				  "여행 메이트와 추억을 쌓고 유대감을 키우는 여행",
-				  "자신을 돌아보고 진정한 자아를 찾는 여행",
-				  "SNS에 공유하며 특별한 순간을 남기는 여행",
-				  "운동과 건강을 챙기며 활력을 얻는 여행",
-				  "새롭고 신나는 경험을 찾아 떠나는 여행",
-				  "역사와 문화를 배우며 탐방하는 여행",
-				  "특별한 목적을 위한 기념 여행 (칠순, 신혼, 수학여행 등)",
-				  "기타, 나만의 특별한 여행 스타일"
-				],
+                options: [
+                    "자연/풍경 감상",
+                    "문화/역사 체험",
+                    "휴식/힐링",
+                    "체험/액티비티"
+                ],
+                type: "dropdown"
+            },
+            {
+                question: "두번째 원하는 여행 스타일을 선택해주세요",
+                options: [
+                    "쇼핑",
+                    "사진 촬영",
+                    "지역 전통 체험",
+                    "친목/모임"
+                ],
                 type: "dropdown"
             },
             {
@@ -92,12 +110,32 @@
             },
             {
                 question: "이동수단은 무엇을 이용하시나요?",
-                options: ["자가용", "버스", "택시", "기차", "버스+지하철", "기타"],
+                options: ["자가용", "대중교통", "도보", "투어버스"],
                 type: "dropdown" 
             },
             {
+                question: "보조 이동수단은 무엇을 이용하시나요?",
+                options: ["없음", "택시", "렌터카", "자전거"],
+                type: "dropdown" 
+            },
+            {
+                question: "첫번째 여행 테마 선호도 (자연/경관)[산,바다,공원 등]",
+                options: ["매우 비선호", "비선호", "보통", "선호", "매우 선호"],
+                type: "slider" 
+            },
+            {
+                question: "두번째 여행 테마 선호도 (문화/역사)[박물관, 유적지 등]",
+                options: ["매우 비선호", "비선호", "보통", "선호", "매우 선호"],
+                type: "slider" 
+            },
+            {
+                question: "세번째 여행 테마 선호도 (액티비티/체험)[놀이공원 등]",
+                options: ["매우 비선호", "비선호", "보통", "선호", "매우 선호"],
+                type: "slider" 
+            },
+            {
                 question: "여행 예산은 어떻게 되나요?",
-                options: ["10만원 이하", "10만원 ~ 20만원", "20만원 ~ 50만원", "50만원 ~ 100만원", "100만원 이상"],
+                options: ["10만원 미만", "10만원 ~ 30만원", "30만원 ~ 50만원", "50만원 이상"],
                 type: "dropdown"
             }
         ];
@@ -110,7 +148,6 @@
             const citiesDropdown = document.getElementById('citiesDropdown');
             const surveyHelp = document.getElementById("surveyHelp");
             
-            // 선택된 권역의 도시들로 두 번째 드롭다운 업데이트
             citiesDropdown.innerHTML = '<option value="">선택해주세요</option>';
             if (selectedRegion) {
                 regionData[selectedRegion].forEach(city => {
@@ -121,7 +158,6 @@
                 citiesDropdown.disabled = true;
             }
             
-            // 이미 저장된 답변이 있다면 복원
             if (surveyAnswers[currentQuestionIndex] && surveyAnswers[currentQuestionIndex].city) {
                 citiesDropdown.value = surveyAnswers[currentQuestionIndex].city;
             }
@@ -252,6 +288,9 @@
             submitButton.disabled = true;
             submitButton.textContent = "처리중...";
 
+            const selectedRegion = surveyAnswers[0].region;
+            const modelType = regionToModel[selectedRegion];
+
             const processedAnswers = surveyAnswers.map(answer => {
                 if (typeof answer === 'object' && answer.city) {
                     return `${answer.city}`;
@@ -259,15 +298,38 @@
                 return answer;
             });
 
+			const formattedData = {
+			    region: regionToModel[surveyAnswers[0].region],
+			    sido: surveyAnswers[0].city,
+			    gender: surveyAnswers[1] === '남성' ? 'M' : 'F',
+			    age_group: parseInt(surveyAnswers[2].replace('대', '')),
+			    companion_count: surveyAnswers[3] === '혼자' ? 0 : parseInt(surveyAnswers[3].replace('명', '')),
+			    companion_type: surveyAnswers[4].toLowerCase(),
+			    travel_motive_primary: surveyAnswers[5].toLowerCase().replace('/', '_'),
+			    travel_motive_secondary: surveyAnswers[6].toLowerCase().replace('/', '_'),
+			    transport_primary: surveyAnswers[8].toLowerCase(),
+			    transport_secondary: surveyAnswers[9].toLowerCase(),
+			    nature_rating: (surveyAnswers[10].indexOf('매우 선호') + 1) || 
+			                  (surveyAnswers[10].indexOf('선호') + 1) || 
+			                  (surveyAnswers[10].indexOf('보통') + 1),
+			    culture_rating: (surveyAnswers[11].indexOf('매우 선호') + 1) || 
+			                   (surveyAnswers[11].indexOf('선호') + 1) || 
+			                   (surveyAnswers[11].indexOf('보통') + 1),
+			    activity_rating: (surveyAnswers[12].indexOf('매우 선호') + 1) || 
+			                    (surveyAnswers[12].indexOf('선호') + 1) || 
+			                    (surveyAnswers[12].indexOf('보통') + 1)
+			};
+			
             axios.post('http://localhost:8080/api/survey/submit', {
-                inputs: processedAnswers
+                inputs: processedAnswers,
+                modelType: modelType
             })
             .then(response => {
                 console.log('Survey response:', response.data);
                 if (response.data.status === 'success') {
                     alert('설문이 성공적으로 제출되었습니다!');
                     $('#surveyModal').modal('hide');
-                    window.location.href = 'http://localhost:3000/survey-results';
+                    window.location.href = `http://localhost:3000/survey-results?model=${modelType}`;
                 }
             })
             .catch(error => {

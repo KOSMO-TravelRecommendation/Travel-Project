@@ -22,16 +22,18 @@ public class RestApiController {
             logger.info("Received survey data: {}", requestBody);
             
             List<String> surveyAnswers = (List<String>) requestBody.get("inputs");
+            String modelType = (String) requestBody.get("modelType"); // 모델 타입 받기
             this.latestSurveyData = surveyAnswers;
             this.latestPredictions = null;
             
-            // 저장된 데이터 로그 출력
             logger.info("Stored survey data: {}", this.latestSurveyData);
+            logger.info("Model type: {}", modelType);
             
             return ResponseEntity.ok(Map.of(
                 "status", "success",
                 "message", "설문이 성공적으로 처리되었습니다.",
-                "data", surveyAnswers
+                "data", surveyAnswers,
+                "modelType", modelType
             ));
             
         } catch (Exception e) {
@@ -52,7 +54,6 @@ public class RestApiController {
             List<Map<String, Object>> predictions = (List<Map<String, Object>>) requestBody.get("predictions");
             this.latestPredictions = predictions;
             
-            // 저장된 예측 결과 로그 출력
             logger.info("Stored prediction results: {}", this.latestPredictions);
             
             return ResponseEntity.ok(Map.of(
@@ -99,7 +100,6 @@ public class RestApiController {
         return ResponseEntity.ok(Map.of("predictions", latestPredictions));
     }
     
-    // 현재 저장된 모든 데이터를 확인하는 디버그용 엔드포인트
     @GetMapping("/debug")
     public ResponseEntity<?> getDebugInfo() {
         Map<String, Object> debugInfo = Map.of(

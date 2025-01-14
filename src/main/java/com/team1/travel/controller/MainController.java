@@ -54,5 +54,10 @@ public class MainController {
         return "map/maptest";
     }
     
+    @GetMapping("/fatra")
+    public String showFatraPage() {
+        return "fatra"; 
+    
 	
+}
 }

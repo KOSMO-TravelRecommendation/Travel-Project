@@ -4,6 +4,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.team1.travel.model.UserVo;
+
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -16,7 +19,9 @@ public class SurveyController {
     }
     
     @GetMapping("/survey/results")
-    public String showResults(Model model) {
+    public String showResults(HttpSession session, Model model) {
+    		UserVo user = (UserVo) session.getAttribute("loggedInUser");
+    		model.addAttribute("user", user);
         return "survey/surveyResult";
     }
 

@@ -2,6 +2,7 @@ package com.team1.travel.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.team1.travel.model.UserDao;
 import com.team1.travel.model.UserVo;
@@ -34,5 +35,52 @@ public class UserService {
     public boolean isEmailAvailable(String userEmail) {
         int count = userDao.countByEmail(userEmail);
         return count == 0; // 이메일이 존재하지 않으면 true 반환
+    }
+    
+    // 회원 정보 수정
+    @Transactional
+    public boolean updateUserInfo(UserVo user) {
+        return userDao.updateUserInfo(user) > 0;
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public boolean updatePassword(int userNo, String currentPassword, String newPassword) {
+        UserVo user = userDao.findByUserNo(userNo);
+        if (user != null) {
+            String storedPassword = userDao.getPasswordByEmail(user.getUserEmail());
+            if (passwordEncoder.matches(currentPassword, storedPassword)) {
+                String encodedNewPassword = passwordEncoder.encode(newPassword);
+                return userDao.updatePassword(userNo, encodedNewPassword) > 0;
+            }
+        }
+        return false;
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public boolean deleteUser(int userNo, String password) {
+        UserVo user = userDao.findByUserNo(userNo);
+        if (user != null) {
+            String storedPassword = userDao.getPasswordByEmail(user.getUserEmail());
+            if (passwordEncoder.matches(password, storedPassword)) {
+                return userDao.deleteUser(userNo) > 0;
+            }
+        }
+        return false;
+    }
+    
+    //비밀번호 검증
+    public boolean checkPassword(int userNo, String password) {
+        UserVo user = userDao.findByUserNo(userNo);
+        if (user != null) {
+            String storedPassword = userDao.getPasswordByEmail(user.getUserEmail());
+            return passwordEncoder.matches(password, storedPassword);
+        }
+        return false;
+    }
+    
+    public UserVo getUserByNo(int userNo) {
+        return userDao.findByUserNo(userNo);
     }
 }

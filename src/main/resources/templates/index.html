@@ -65,48 +65,49 @@
 		</div>
 	</nav>
 
-	<!-- Hero Section -->
-	<div class="hero-section">
-		<div class="container">
-			<div class="hero-content">
-				<h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
-				<h1 th:if="${user != null}" th:text="${user.userName + '님, 어떤 여행을 찾고 계신가요?'}">
-					사용자님, 어떤 여행을 찾고 계신가요?
-				</h1>
-				<p>AI 기반 맞춤 여행지 추천 서비스</p>
-				<a href="/restaurant" class="btn btn-primary btn-lg">여행 시작하기</a>
-			</div>
-		</div>
-	</div>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
+                <h1 th:if="${user != null}" th:text="${user.userName + '님, 어떤 여행을 찾고 계신가요?'}">
+                    사용자님, 어떤 여행을 찾고 계신가요?
+                </h1>
+                <p class="hero-subtitle">AI 기반 맞춤 여행지 추천 서비스</p>
+                <a href="/recommendation" class="btn btn-primary btn-lg mt-4" id="startTravelBtn">여행 시작하기</a>
+            </div>
+        </div>
+    </div>
 
-	<!-- Features Section -->
-	<div class="container">
-		<div class="row">
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-map-marked-alt"></i>
-					<h4>인기 여행지</h4>
-					<p>가장 추천받는 국내 여행지를 소개합니다.</p>
-					<a href="/fatra" class="btn btn-outline-primary">더 알아보기</a>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-magic"></i>
-					<h4>AI 추천</h4>
-					<p>취향에 딱 맞는 여행지를 AI가 찾아드려요.</p>
-					<a href="recommendation" class="btn btn-outline-primary">AI 추천 받기</a>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-globe-americas"></i>
-					<h4>최신 여행지</h4>
-					<p>새롭게 등록된 숨은 명소를 발견하세요.</p>
-					<a href="#" class="btn btn-outline-primary">둘러보기</a>
-				</div>
-			</div>
-		</div>
+    <!-- Features Section -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="feature-box h-100">
+                    <i class="fas fa-map-marked-alt mb-4"></i>
+                    <h4 class="feature-title">인기 여행지</h4>
+                    <p class="feature-text mb-4">가장 추천받는 국내 여행지를 소개합니다.</p>
+                    <a href="/fatra" class="btn btn-outline-primary mt-auto">더 알아보기</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="feature-box h-100">
+                    <i class="fas fa-magic mb-4"></i>
+                    <h4 class="feature-title">AI 추천</h4>
+                    <p class="feature-text mb-4">취향에 딱 맞는 여행지를 AI가 찾아드려요.</p>
+                    <a href="/recommendation" class="btn btn-outline-primary mt-auto">AI 추천 받기</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="feature-box h-100">
+                    <i class="fas fa-globe-americas mb-4"></i>
+                    <h4 class="feature-title">최신 여행지</h4>
+                    <p class="feature-text mb-4">새롭게 등록된 숨은 명소를 발견하세요.</p>
+                    <a href="#" class="btn btn-outline-primary mt-auto">둘러보기</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
 		<!-- Travel Cards Section -->
 		<div class="card-section">
@@ -157,6 +158,39 @@
 					</div>
 				</div>
 			</div>
+            <!-- Calendar Section -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-95">
+                    <div class="card-body">
+                        <div id="calendar" class="calendar-container">
+                            <div class="calendar-header d-flex justify-content-between align-items-center mb-4">
+                                <button class="btn btn-link" id="prevMonth">&lt;</button>
+                                <h5 class="calendar-title mb-0"></h5>
+                                <button class="btn btn-link" id="nextMonth">&gt;</button>
+                            </div>
+                            <div class="calendar-weekdays d-flex justify-content-between mb-2">
+                                <div>일</div>
+                                <div>월</div>
+                                <div>화</div>
+                                <div>수</div>
+                                <div>목</div>
+                                <div>금</div>
+                                <div>토</div>
+                            </div>
+                            <div class="calendar-days" id="calendarDays"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer text-center">
+        <div class="container">
+            <p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
+        </div>
+    </footer>
 
 			<!-- Footer -->
 			<footer class="footer text-center">

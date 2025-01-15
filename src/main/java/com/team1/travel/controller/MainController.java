@@ -48,6 +48,16 @@ public class MainController {
         model.addAttribute("user", user);
         return "survey/surveyform";
     }
-   
+    
+    @GetMapping("maptest")
+    public String maptest() {
+        return "map/maptest";
+    }
+    
+    @GetMapping("/fatra")
+    public String Fatra() {
+        return "fatra"; 
+    
 	
+}
 }

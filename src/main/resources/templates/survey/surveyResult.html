@@ -84,6 +84,15 @@
             font-weight: 600;
             color: #007bff;
         }
+          #map {
+        width: 100%;
+        height: 400px;
+        margin: 0 auto; /* 지도 중앙 정렬 */
+    }
+
+    .modal-lg {
+        max-width: 90%; /* 모달 크기 조정 */
+    }
     </style>
     <!-- 카카오맵 API -->
     <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d0d50c9d3015d393b7632551eff16da0&libraries=services"></script>
@@ -176,12 +185,13 @@
         </div>
     </div>
 
-    <!-- 지도 모달 -->
+ 
     <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="mapModalLabel">상세 보기</h5>
+                    
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -280,6 +290,7 @@
                                     ${place.score.toFixed(1)}점
                                 </div>
                                 <button class="btn btn-outline-primary btn-sm" onclick="openMapModal('${place.address}')">상세보기</button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="addToFavorites(place)">즐겨찾기</button>
                             </div>
                         </div>
                     </div>
@@ -296,58 +307,69 @@
             document.getElementById('errorText').textContent = message;
             document.getElementById('errorMessage').style.display = 'block';
         }
+
         function openMapModal(address) {
-            // 모달 표시
             $('#mapModal').modal('show');
 
-            // 카카오맵 컨테이너
-            const mapContainer = document.getElementById('map');
-            mapContainer.innerHTML = ''; // 이전 지도 초기화
+            $('#mapModal').on('shown.bs.modal', function () {
+                const mapContainer = document.getElementById('map');
+                mapContainer.innerHTML = ''; // 이전 지도 초기화
 
-            const mapOptions = {
-                center: new kakao.maps.LatLng(37.5665, 126.9780), // 기본 좌표 (서울 시청)
-                level: 1 // 확대 레벨
+                const mapOptions = {
+                    center: new kakao.maps.LatLng(37.5665, 126.9780), // 기본 좌표 (서울 시청)
+                    level: 4 // 기본 확대 레벨
+                };
+
+                const map = new kakao.maps.Map(mapContainer, mapOptions);
+                const geocoder = new kakao.maps.services.Geocoder();
+
+                geocoder.addressSearch(address, function (result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                        map.setCenter(coords);
+
+                        const marker = new kakao.maps.Marker({
+                            map: map,
+                            position: coords
+                        });
+
+                        const infowindow = new kakao.maps.InfoWindow({
+                            content: `<div style="padding:5px; text-align: center;">${address}</div>`
+                        });
+                        infowindow.open(map, marker);
+
+                        const bounds = new kakao.maps.LatLngBounds();
+                        bounds.extend(coords);
+                        map.setBounds(bounds);
+
+                        const directionsBtn = document.getElementById('directionsBtn');
+                        directionsBtn.onclick = () => {
+                            window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
+                        };
+                    } else {
+                        alert('해당 주소를 찾을 수 없습니다.');
+                    }
+                });
+            });
+        }
+
+        async function addToFavorites(place) {
+            const userId = 1;  // 사용자 ID, 로그인된 사용자의 ID를 적절히 가져와야 함
+            const favoriteData = {
+                userId: userId,
+                placeName: place.place_name,
+                placeAddress: place.address,
+                placeType: place.type,
+                placeScore: place.score
             };
 
-            const map = new kakao.maps.Map(mapContainer, mapOptions);
-
-            // 주소 검색 객체 생성
-            const geocoder = new kakao.maps.services.Geocoder();
-
-            // 주소를 좌표로 변환
-            geocoder.addressSearch(address, function (result, status) {
-                if (status === kakao.maps.services.Status.OK) {
-                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                    // 지도 중심을 마커 위치로 설정
-                    map.setCenter(coords);
-
-                    // 마커 생성
-                    const marker = new kakao.maps.Marker({
-                        map: map,
-                        position: coords
-                    });
-
-                    // 마커에 정보 창 추가
-                    const infowindow = new kakao.maps.InfoWindow({
-                        content: `<div style="padding:5px; text-align: center;">${address}</div>`
-                    });
-                    infowindow.open(map, marker);
-
-                    // 지도 범위 설정 (마커 위치를 고려해 지도 영역 재조정)
-                    const bounds = new kakao.maps.LatLngBounds();
-                    bounds.extend(coords); // 마커 위치를 기준으로 범위 확장
-                    map.setBounds(bounds); // 새로운 범위로 지도 영역 조정
-
-                    // 길 찾기 버튼 클릭 시 카카오맵으로 길 찾기
-                    const directionsBtn = document.getElementById('directionsBtn');
-                    directionsBtn.onclick = () => {
-                        window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
-                    };
-                } else {
-                    alert('해당 주소를 찾을 수 없습니다.');
-                }
-            });
+            try {
+                await axios.post('/api/favorites/add', favoriteData);
+                alert('즐겨찾기에 추가되었습니다!');
+            } catch (error) {
+                console.error('Error adding favorite:', error);
+                alert('즐겨찾기 추가에 실패했습니다.');
+            }
         }
 
 

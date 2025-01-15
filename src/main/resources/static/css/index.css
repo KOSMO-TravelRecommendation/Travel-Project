@@ -1,18 +1,31 @@
-/* index.css */
-body {
-    background-color: #f4f6f9;
-    font-family: 'Noto Sans KR', sans-serif;
+/* Base Styles */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --background-color: #f4f6f9;
+    --text-color: #333;
+    --white: #ffffff;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
 }
 
+body {
+    background-color: var(--background-color);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Hero Section */
 .hero-section {
     background-image: url('/img/index.jpg');
     background-size: cover;
     background-position: center;
     position: relative;
-    color: white;
-    padding: 150px 0;
+    color: var(--white);
+    padding: 8rem 0;
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 4rem;
 }
 
 .hero-section::before {
@@ -22,128 +35,203 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6));
 }
 
 .hero-content {
     position: relative;
     z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .hero-section h1 {
-    font-weight: bold;
-    margin-bottom: 20px;
-    font-size: 3rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-weight: 700;
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-section p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    font-size: 1.4rem;
+    margin-bottom: 2rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    opacity: 0.9;
 }
 
+/* Feature Boxes */
 .feature-box {
-    background-color: white;
-    border-radius: 10px;
-    padding: 30px;
+    background-color: var(--white);
+    border-radius: 15px;
+    padding: 2.5rem 2rem;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
-    transition: transform 0.3s ease;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .feature-box:hover {
     transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .feature-box i {
     font-size: 3rem;
-    color: #007bff;
-    margin-bottom: 20px;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
 }
 
+.feature-box h4 {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+/* Travel Cards */
 .card-section {
-    margin-top: 50px;
+    margin-top: 4rem;
 }
 
-/* Travel card 스타일 */
 .travel-card {
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 20px;  /* 카드들 사이의 간격을 줄였습니다 */
-    transition: transform 0.3s ease;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    height: 100%;
+    background-color: var(--white);
     display: flex;
     flex-direction: column;
-    height: 100%;
-    background-color: #fff;
 }
 
 .travel-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .travel-card img {
-    height: 200px;  /* 이미지 높이를 줄여서 공백을 줄였습니다 */
+    height: 220px;
     object-fit: cover;
     width: 100%;
+    transition: var(--transition);
+}
+
+.travel-card:hover img {
+    transform: scale(1.05);
 }
 
 .card-body {
-    padding: 10px 15px; /* 카드 내부 패딩을 줄여서 공백을 최소화 */
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     flex-grow: 1;
 }
 
 .card-title {
-    text-align: center;
     font-size: 1.4rem;
-    margin-bottom: 10px; /* 제목과 내용 간의 간격 줄이기 */
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+    text-align: center;
 }
 
 .card-text {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
     text-align: center;
-    font-size: 1rem;
-    margin-bottom: 10px; /* 내용과 버튼 간의 간격 줄이기 */
+    flex-grow: 1;
 }
 
 .card-body .btn {
-    margin-top: auto; /* 버튼을 카드 하단에 고정 */
+    align-self: center;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
 }
 
+.card-body .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.card-body .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* Footer */
 .footer {
-    background-color: #343a40;
-    color: white;
-    padding: 30px 0;
-    margin-top: 50px;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    padding: 3rem 0;
+    margin-top: 4rem;
 }
 
-/* 모바일 화면에서 카드 내부 패딩 및 텍스트 크기 조정 */
+.footer a {
+    color: var(--white);
+    transition: var(--transition);
+}
+
+.footer a:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+    .hero-section {
+        padding: 6rem 0;
+    }
+
     .hero-section h1 {
-        font-size: 2rem;
+        font-size: 2.5rem;
     }
+
     .hero-section p {
-        font-size: 1rem;
-    }
-
-    .travel-card img {
-        height: 180px; /* 모바일에서 이미지 크기 줄이기 */
-    }
-
-    .card-title {
         font-size: 1.2rem;
     }
 
+    .feature-box {
+        padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .travel-card {
+        margin-bottom: 2rem;
+    }
+
+    .travel-card img {
+        height: 200px;
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+    }
+
     .card-text {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .card-body {
-        padding: 10px; /* 모바일에서 패딩 줄이기 */
+        padding: 1.25rem;
     }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feature-box, .travel-card {
+    animation: fadeIn 0.6s ease-out forwards;
 }

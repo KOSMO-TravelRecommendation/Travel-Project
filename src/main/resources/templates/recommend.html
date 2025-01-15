@@ -49,9 +49,9 @@
 							<span th:text="${user.userName + '님 환영합니다'}">사용자님 환영합니다</span>
 						</a>
 						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<a class="dropdown-item" href="/mypage">마이페이지</a>
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="/logout">로그아웃</a>
+						    <a class="dropdown-item" href="#editProfileModal" data-toggle="modal" id="editProfileLink">회원 정보 수정</a>
+						    <div class="dropdown-divider"></div>
+						    <a class="dropdown-item" href="/logout">로그아웃</a>
 						</div>
 					</li>
 				</ul>
@@ -197,6 +197,16 @@
 					// 새로 추가된 모달 표시
 					$('#surveyModal').modal('show');
 				});
+			});
+			
+			// 마이페이지 모달
+			$('#editProfileLink').click(function (event) {
+			    event.preventDefault();
+			    $('#editProfileModal').remove();
+			    $.get('/user/mypage', function (data) {
+			        $('#modalContainer').html(data);
+			        $('#editProfileModal').modal('show');
+			    });
 			});
 		});
 	</script>

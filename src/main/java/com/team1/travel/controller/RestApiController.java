@@ -1,19 +1,25 @@
 package com.team1.travel.controller;
 
-import java.util.List;
-import java.util.Map;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
 @RequestMapping("/api/survey")
 public class RestApiController {
     
     private static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
-    private List<String> latestSurveyData;
+    private Map<String, Object> latestSurveyData;
     private List<Map<String, Object>> latestPredictions;
     
     @PostMapping("/submit")
@@ -21,28 +27,110 @@ public class RestApiController {
         try {
             logger.info("Received survey data: {}", requestBody);
             
-            List<String> surveyAnswers = (List<String>) requestBody.get("inputs");
-            String modelType = (String) requestBody.get("modelType"); // 모델 타입 받기
-            this.latestSurveyData = surveyAnswers;
+            // null 체크
+            if (requestBody == null || !requestBody.containsKey("inputs") || !requestBody.containsKey("modelType")) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", "필수 데이터가 누락되었습니다."
+                ));
+            }
+
+            @SuppressWarnings("unchecked")
+            List<Object> surveyAnswers = (List<Object>) requestBody.get("inputs");
+            String modelType = (String) requestBody.get("modelType");
+            
+            if (surveyAnswers == null || surveyAnswers.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", "설문 응답이 비어있습니다."
+                ));
+            }
+
+            // 데이터 형식 변환
+            Map<String, Object> formattedData = formatSurveyData(surveyAnswers);
+            formattedData.put("model_type", modelType);
+            
+            // 최신 데이터 저장
+            this.latestSurveyData = formattedData;
             this.latestPredictions = null;
             
-            logger.info("Stored survey data: {}", this.latestSurveyData);
-            logger.info("Model type: {}", modelType);
+            logger.info("Processed survey data: {}", this.latestSurveyData);
             
             return ResponseEntity.ok(Map.of(
                 "status", "success",
                 "message", "설문이 성공적으로 처리되었습니다.",
-                "data", surveyAnswers,
-                "modelType", modelType
+                "data", formattedData
             ));
             
         } catch (Exception e) {
             logger.error("Error processing survey: ", e);
             return ResponseEntity.internalServerError().body(Map.of(
                 "status", "error",
-                "message", e.getMessage()
+                "message", "서버 처리 중 오류가 발생했습니다: " + e.getMessage()
             ));
         }
+    }
+    
+    private Map<String, Object> formatSurveyData(List<Object> inputs) {
+        Map<String, Object> formatted = new HashMap<>();
+        try {
+            formatted.put("SIDO", String.valueOf(inputs.get(0)));
+            formatted.put("gender", String.valueOf(inputs.get(1)).equals("남성") ? "M" : "F");
+            
+            // 연령대 처리
+            String ageGroup = String.valueOf(inputs.get(2));
+            int age;
+            if (ageGroup.contains("이상")) {
+                age = 60;  // "60대 이상"인 경우 60으로 설정
+            } else {
+                age = Integer.parseInt(ageGroup.replace("대", ""));
+            }
+            formatted.put("age_group", age);
+            
+            // 동반자 수 처리
+            formatted.put("companion_count", String.valueOf(inputs.get(3)).equals("혼자") ? 0 : 
+                Integer.parseInt(String.valueOf(inputs.get(3)).replace("명", "")));
+            
+            // 동반자 유형
+            formatted.put("companion_type", String.valueOf(inputs.get(4)).toLowerCase());
+            
+            // 여행 스타일
+            formatted.put("travel_motive_primary", String.valueOf(inputs.get(5)).toLowerCase().replace("/", "_"));
+            formatted.put("travel_motive_secondary", String.valueOf(inputs.get(6)).toLowerCase().replace("/", "_"));
+            
+            // 이동수단
+            formatted.put("transport_primary", String.valueOf(inputs.get(8)).toLowerCase());
+            formatted.put("transport_secondary", String.valueOf(inputs.get(9)).toLowerCase());
+            
+            // 선호도 점수
+            formatted.put("nature_rating", convertRatingToNumber(String.valueOf(inputs.get(10))));
+            formatted.put("culture_rating", convertRatingToNumber(String.valueOf(inputs.get(11))));
+            formatted.put("activity_rating", convertRatingToNumber(String.valueOf(inputs.get(12))));
+            
+            // 예산 정보
+            if (inputs.size() > 13) {
+                formatted.put("budget", String.valueOf(inputs.get(13)));
+            }
+            
+        } catch (IndexOutOfBoundsException e) {
+            logger.error("Invalid input array length: ", e);
+            throw new IllegalArgumentException("입력 데이터 형식이 올바르지 않습니다.");
+        } catch (Exception e) {
+            logger.error("Error formatting survey data: ", e);
+            throw new IllegalArgumentException("데이터 처리 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return formatted;
+    }
+    
+    private int convertRatingToNumber(String rating) {
+        Map<String, Integer> ratings = Map.of(
+            "매우 선호", 5,
+            "선호", 4,
+            "보통", 3,
+            "비선호", 2,
+            "매우 비선호", 1
+        );
+        return ratings.getOrDefault(rating, 3);  // 기본값 3 (보통)
     }
     
     @PostMapping("/predictions")
@@ -53,8 +141,6 @@ public class RestApiController {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> predictions = (List<Map<String, Object>>) requestBody.get("predictions");
             this.latestPredictions = predictions;
-            
-            logger.info("Stored prediction results: {}", this.latestPredictions);
             
             return ResponseEntity.ok(Map.of(
                 "status", "success",
@@ -73,42 +159,21 @@ public class RestApiController {
     
     @GetMapping("/latest")
     public ResponseEntity<?> getLatestSurvey() {
-        logger.info("Retrieving latest survey data: {}", latestSurveyData);
-        logger.info("Retrieving latest predictions: {}", latestPredictions);
-        
         if (latestSurveyData == null) {
-            logger.warn("No survey data found");
             return ResponseEntity.notFound().build();
         }
         
-        Map<String, Object> response = Map.of(
+        return ResponseEntity.ok(Map.of(
             "inputs", latestSurveyData,
             "predictions", latestPredictions != null ? latestPredictions : List.of()
-        );
-        
-        return ResponseEntity.ok(response);
+        ));
     }
     
     @GetMapping("/results")
     public ResponseEntity<?> getLatestResults() {
-        logger.info("Retrieving latest prediction results: {}", latestPredictions);
-        
         if (latestPredictions == null) {
-            logger.warn("No prediction results found");
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(Map.of("predictions", latestPredictions));
-    }
-    
-    @GetMapping("/debug")
-    public ResponseEntity<?> getDebugInfo() {
-        Map<String, Object> debugInfo = Map.of(
-            "surveyData", latestSurveyData != null ? latestSurveyData : "No survey data",
-            "predictions", latestPredictions != null ? latestPredictions : "No predictions",
-            "timestamp", System.currentTimeMillis()
-        );
-        
-        logger.info("Debug info requested: {}", debugInfo);
-        return ResponseEntity.ok(debugInfo);
     }
 }

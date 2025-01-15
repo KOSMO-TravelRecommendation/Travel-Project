@@ -38,9 +38,9 @@ public class UserController {
     public String loginPage() {
         return "user/login";
     }
-
+    
     // 마이 페이지
-    @GetMapping("/mypage")
+    @GetMapping("/user/mypage")
     public String mypage(HttpSession session,Model model) {
         UserVo user = (UserVo) session.getAttribute("loggedInUser");
         if (user == null) {
@@ -48,6 +48,128 @@ public class UserController {
         }
         model.addAttribute("user", user);
         return "user/mypage";
+    }
+    
+    //회원 탈퇴 모달
+    @GetMapping("/user/mypage/delete")
+    public String deleteAccountModal(HttpSession session, Model model) {
+        UserVo user = (UserVo) session.getAttribute("loggedInUser");
+        model.addAttribute("user", user);
+        return "user/deleteAccount";
+    }
+
+    @PostMapping("/mypage/delete")
+    @ResponseBody  
+    public Map<String, Object> delete(@RequestParam String password, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        UserVo currentUser = (UserVo) session.getAttribute("loggedInUser");
+        
+        if (currentUser != null) {
+            boolean result = userService.deleteUser(currentUser.getUserNo(), password);
+            
+            if (result) {
+                session.invalidate();
+                response.put("success", true);
+                response.put("message", "회원 탈퇴가 완료되었습니다.");
+            } else {
+                response.put("success", false);
+                response.put("message", "비밀번호가 일치하지 않습니다.");
+            }
+        } else {
+            response.put("success", false);
+            response.put("message", "로그인 상태가 아닙니다.");
+        }
+        
+        return response;
+    }
+    
+    @PostMapping("/user/mypage/update")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateProfile(
+        @ModelAttribute UserVo updatedUser,
+        @RequestParam String currentPassword,
+        @RequestParam(required = false) String newPassword,
+        HttpSession session) {
+        
+        Map<String, Object> response = new HashMap<>();
+        UserVo currentUser = (UserVo) session.getAttribute("loggedInUser");
+        
+        if (currentUser == null) {
+            response.put("success", false);
+            response.put("message", "로그인이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        
+        // 현재 사용자의 번호 설정
+        updatedUser.setUserNo(currentUser.getUserNo());
+        
+        // 현재 비밀번호 확인
+        if (!userService.checkPassword(currentUser.getUserNo(), currentPassword)) {
+            response.put("success", false);
+            response.put("message", "현재 비밀번호가 일치하지 않습니다.");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            // 새 비밀번호가 있는 경우
+            if (newPassword != null && !newPassword.trim().isEmpty()) {
+                boolean passwordUpdated = userService.updatePassword(
+                    currentUser.getUserNo(), 
+                    currentPassword, 
+                    newPassword
+                );
+                if (!passwordUpdated) {
+                    response.put("success", false);
+                    response.put("message", "비밀번호 변경에 실패했습니다.");
+                    return ResponseEntity.ok(response);
+                }
+            }
+            
+            // 기본 정보 업데이트
+            boolean profileUpdated = userService.updateUserInfo(updatedUser);
+            
+            if (profileUpdated) {
+                // 세션 업데이트
+                UserVo updatedUserInfo = userService.getUserByNo(currentUser.getUserNo());
+                session.setAttribute("loggedInUser", updatedUserInfo);
+                
+                response.put("success", true);
+                response.put("message", "회원정보가 성공적으로 수정되었습니다.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "회원정보 수정에 실패했습니다.");
+                return ResponseEntity.ok(response);
+            }
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/user/mypage/check-password")
+    @ResponseBody
+    public Map<String, Boolean> checkCurrentPassword(
+        @RequestParam String currentPassword, 
+        HttpSession session) {
+        
+        Map<String, Boolean> response = new HashMap<>();
+        UserVo currentUser = (UserVo) session.getAttribute("loggedInUser");
+        
+        if (currentUser != null) {
+            boolean isValid = userService.checkPassword(
+                currentUser.getUserNo(), 
+                currentPassword
+            );
+            response.put("valid", isValid);
+        } else {
+            response.put("valid", false);
+        }
+        
+        return response;
     }
     
     // 즐겨 찾기

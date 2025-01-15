@@ -1,0 +1,84 @@
+#calendar {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.calendar-header {
+    padding: 10px 0;
+}
+
+.calendar-title {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.calendar-weekdays {
+    font-weight: bold;
+}
+
+.calendar-weekdays div {
+    width: 14.28%;
+    text-align: center;
+    color: #666;
+}
+
+.calendar-weekdays div:first-child {
+    color: #ff4d4d;  /* 일요일 색상 */
+}
+
+.calendar-weekdays div:last-child {
+    color: #4d79ff;  /* 토요일 색상 */
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.calendar-day:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar-day.today {
+    background-color: #007bff;
+    color: white;
+}
+
+.calendar-day.other-month {
+    color: #ccc;
+}
+
+.btn-link {
+    color: #007bff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.btn-link:hover {
+    color: #0056b3;
+    background-color: #f8f9fa;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .calendar-day {
+        font-size: 0.8rem;
+    }
+    
+    .calendar-title {
+        font-size: 1rem;
+    }
+}

@@ -84,6 +84,14 @@
             font-weight: 600;
             color: #007bff;
         }
+          #map {
+        width: 100%;
+        height: 400px; /* 모달 크기에 맞춰 설정 */
+        margin: 0 auto; /* 지도 중앙 정렬 */
+    }
+
+    .modal-lg {
+        max-width: 90%; /* 모달 크기 조정 */
     </style>
     <!-- 카카오맵 API -->
     <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d0d50c9d3015d393b7632551eff16da0&libraries=services"></script>
@@ -347,6 +355,61 @@
                 } else {
                     alert('해당 주소를 찾을 수 없습니다.');
                 }
+            });
+        }
+        function openMapModal(address) {
+            // 모달 표시
+            $('#mapModal').modal('show');
+
+            // 모달이 열린 후에 지도 크기를 재조정하여 모달에 맞게 표시
+            $('#mapModal').on('shown.bs.modal', function () {
+                const mapContainer = document.getElementById('map');
+                mapContainer.innerHTML = ''; // 이전 지도 초기화
+
+                const mapOptions = {
+                    center: new kakao.maps.LatLng(37.5665, 126.9780), // 기본 좌표 (서울 시청)
+                    level: 4 // 기본 확대 레벨
+                };
+
+                const map = new kakao.maps.Map(mapContainer, mapOptions);
+
+                // 주소 검색 객체 생성
+                const geocoder = new kakao.maps.services.Geocoder();
+
+                // 주소를 좌표로 변환
+                geocoder.addressSearch(address, function (result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                        // 지도 중심을 마커 위치로 설정
+                        map.setCenter(coords);
+
+                        // 마커 생성
+                        const marker = new kakao.maps.Marker({
+                            map: map,
+                            position: coords
+                        });
+
+                        // 마커에 정보 창 추가
+                        const infowindow = new kakao.maps.InfoWindow({
+                            content: `<div style="padding:5px; text-align: center;">${address}</div>`
+                        });
+                        infowindow.open(map, marker);
+
+                        // 현재 화면 중심을 기준으로 지도 확대 및 위치 조정
+                        const bounds = new kakao.maps.LatLngBounds();
+                        bounds.extend(coords); // 마커 위치를 기준으로 범위 확장
+                        map.setBounds(bounds); // 새로운 범위로 지도 영역 재조정
+
+                        // 길 찾기 버튼 클릭 시 카카오맵으로 길 찾기
+                        const directionsBtn = document.getElementById('directionsBtn');
+                        directionsBtn.onclick = () => {
+                            window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
+                        };
+                    } else {
+                        alert('해당 주소를 찾을 수 없습니다.');
+                    }
+                });
             });
         }
 

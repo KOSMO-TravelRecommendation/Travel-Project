@@ -35,6 +35,7 @@ public class MainController {
         model.addAttribute("user", user);
 		model.addAttribute("popularApiKey", popularApiKey);
 
+       
         return "fatra";
 	}
     

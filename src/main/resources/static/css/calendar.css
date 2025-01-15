@@ -1,6 +1,5 @@
 #calendar {
     font-family: 'Noto Sans KR', sans-serif;
-    margin-top: 1rem;
 }
 
 .calendar-header {
@@ -24,11 +23,11 @@
 }
 
 .calendar-weekdays div:first-child {
-    color: #ff4d4d; /* 일요일 색상 */
+    color: #ff4d4d;  /* 일요일 색상 */
 }
 
 .calendar-weekdays div:last-child {
-    color: #4d79ff; /* 토요일 색상 */
+    color: #4d79ff;  /* 토요일 색상 */
 }
 
 .calendar-days {
@@ -46,7 +45,6 @@
     border-radius: 50%;
     transition: all 0.3s ease;
     font-size: 0.9rem;
-    position: relative; /* 툴팁 위치 지정을 위해 추가 */
 }
 
 .calendar-day:hover {
@@ -55,51 +53,11 @@
 
 .calendar-day.today {
     background-color: #007bff;
-    color: white !important; /* 오늘 날짜는 항상 흰색으로 표시 */
+    color: white;
 }
 
 .calendar-day.other-month {
     color: #ccc;
-}
-
-.calendar-day.holiday {
-    font-weight: bold;
-}
-
-/* 툴팁 스타일 */
-.holiday-tooltip {
-    visibility: hidden;
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-/* 툴팁 화살표 */
-.holiday-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
-}
-
-/* 호버 시 툴팁 표시 */
-.calendar-day:hover .holiday-tooltip {
-    visibility: visible;
-    opacity: 1;
 }
 
 .btn-link {
@@ -119,13 +77,8 @@
     .calendar-day {
         font-size: 0.8rem;
     }
-
+    
     .calendar-title {
         font-size: 1rem;
-    }
-
-    .holiday-tooltip {
-        font-size: 0.7rem;
-        padding: 3px 8px;
     }
 }

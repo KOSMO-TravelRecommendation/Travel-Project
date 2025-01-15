@@ -14,7 +14,7 @@
                         <i class="fas fa-exclamation-triangle text-warning fa-2x mb-3"></i>
                         <h6 class="font-weight-bold">정말로 탈퇴하시겠습니까?</h6>
                         <p class="text-muted">
-                            탈퇴하시면 모든 정보가 삭제되며, 이 작업은 되돌릴 수 없습니다.<br>
+                            탈퇴하시면 모든 정보가 삭제되며,<br> 이 작업은 되돌릴 수 없습니다.<br>
                             탈퇴를 진행하시려면 비밀번호를 입력해주세요.
                         </p>
                     </div>
@@ -34,3 +34,10 @@
         </div>
     </div>
 </div>
+
+<script>
+$('#deleteAccountModal').on('hidden.bs.modal', function () {
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open');
+});
+</script>

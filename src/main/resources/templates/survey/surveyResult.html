@@ -102,11 +102,10 @@
 <body>
     <!-- Alert Message -->
     <div th:if="${not #strings.isEmpty(message)}">
-       <script th:inline="javascript">
-        /*<![CDATA[*/
-        var userId = /*[[${user != null ? user.userNo : null}]]*/ null;
-        /*]]>*/
-    </script>
+      <script th:inline="javascript">
+    var userId = /*[[${user != null ? user.userNo : null}]]*/ null;
+</script>
+
     </div>
 
     <!-- Navigation Bar -->
@@ -229,189 +228,173 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <!-- Custom Scripts -->
-    <script>
-        const placeTypes = {
-            1: '자연 관광지',
-            2: '자연 휴양지',
-            3: '문화 유적지',
-            4: '박물관/미술관',
-            5: '체험 관광지',
-            6: '액티비티',
-            7: '쇼핑/맛집',
-            8: '기타'
-        };
+<script>
+    const placeTypes = {
+        1: '자연 관광지',
+        2: '자연 휴양지',
+        3: '문화 유적지',
+        4: '박물관/미술관',
+        5: '체험 관광지',
+        6: '액티비티',
+        7: '쇼핑/맛집',
+        8: '기타'
+    };
 
-        async function fetchRecommendations() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const modelType = urlParams.get('model');
+    let userId;
 
-                const surveyResponse = await axios.get('/api/survey/latest');
-                const surveyData = surveyResponse.data;
+    // 페이지 로드 시 userId 가져오기
+    document.addEventListener('DOMContentLoaded', function() {
+        // 예시로 userId를 DOM에서 가져오는 코드
+        userId = document.getElementById('userIdField')?.value || null;
 
-                if (!surveyData.inputs) {
-                    throw new Error('설문 데이터를 찾을 수 없습니다.');
-                }
+        fetchRecommendations();
+        
+        $('#mapModal').on('hidden.bs.modal', function () {
+            $(this).off('shown.bs.modal');
+        });
+    });
 
-                const predictionResponse = await axios.post('http://localhost:5000/predict', {
-                    survey_data: surveyData.inputs,
-                    model_type: modelType
-                });
+    async function fetchRecommendations() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const modelType = urlParams.get('model') || 'defaultModel'; // 기본값 설정
 
-                if (!predictionResponse.data.recommendations) {
-                    throw new Error('추천 결과를 받아오지 못했습니다.');
-                }
+            const surveyResponse = await axios.get('/api/survey/latest');
+            const surveyData = surveyResponse.data;
 
-                await axios.post('/api/survey/predictions', {
-                    predictions: predictionResponse.data.recommendations
-                });
-
-                displayResults(predictionResponse.data.recommendations);
-            } catch (error) {
-                console.error('Error:', error);
-                showError(error.message || '추천 처리 중 오류가 발생했습니다.');
+            if (!surveyData.inputs) {
+                throw new Error('설문 데이터를 찾을 수 없습니다.');
             }
+
+            const predictionResponse = await axios.post('http://localhost:5000/predict', {
+                survey_data: surveyData.inputs,
+                model_type: modelType
+            });
+
+            if (!predictionResponse.data.recommendations) {
+                throw new Error('추천 결과를 받아오지 못했습니다.');
+            }
+
+            await axios.post('/api/survey/predictions', {
+                predictions: predictionResponse.data.recommendations
+            });
+
+            displayResults(predictionResponse.data.recommendations);
+        } catch (error) {
+            console.error('Error:', error);
+            showError(error.message || '추천 처리 중 오류가 발생했습니다.');
         }
+    }
 
-        function displayResults(recommendations) {
-            const container = document.getElementById('recommendationsContainer');
-            container.innerHTML = '';
+    function displayResults(recommendations) {
+        const container = document.getElementById('recommendationsContainer');
+        container.innerHTML = '';
 
-            recommendations.forEach(place => {
-                const placeElement = document.createElement('div');
-                placeElement.className = 'col-md-6 col-lg-4 mb-4';
-                placeElement.innerHTML = `
-                    <div class="card h-100 shadow-sm hover-shadow">
-                        <div class="card-body">
-                            <span class="card-type">${placeTypes[place.type]}</span>
-                            <h3 class="card-title h5">${place.place_name}</h3>
-                            <p class="card-address">${place.address}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="card-score">
-                                    <i class="fas fa-star text-warning"></i>
-                                    ${place.score.toFixed(1)}점
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="openMapModal('${place.address}')">상세보기</button>
-                                <button class="btn btn-outline-success btn-sm" 
-                                    onclick="addFavorite('${place.place_name}', '${place.address}')">
-                                    즐겨찾기
-                                </button>
+        recommendations.forEach(place => {
+            const placeElement = document.createElement('div');
+            placeElement.className = 'col-md-6 col-lg-4 mb-4';
+            placeElement.innerHTML = `
+                <div class="card h-100 shadow-sm hover-shadow">
+                    <div class="card-body">
+                        <span class="card-type">${placeTypes[place.type]}</span>
+                        <h3 class="card-title h5">${place.place_name}</h3>
+                        <p class="card-address">${place.address}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="card-score">
+                                <i class="fas fa-star text-warning"></i>
+                                ${place.score.toFixed(1)}점
                             </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="openMapModal('${place.address}')">상세보기</button>
+                            <button class="btn btn-outline-success btn-sm" onclick="addFavorite('${place.place_name}', '${place.address}')">
+                                즐겨찾기
+                            </button>
                         </div>
                     </div>
-                `;
-                container.appendChild(placeElement);
-            });
+                </div>
+            `;
+            container.appendChild(placeElement);
+        });
 
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('resultsContainer').style.display = 'block';
-        }
-        
-        function showError(message) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('errorText').textContent = message;
-            document.getElementById('errorMessage').style.display = 'block';
-        }
-       
-        function openMapModal(address) {
-            $('#mapModal').modal('show');
-
-            $('#mapModal').on('shown.bs.modal', function () {
-                const mapContainer = document.getElementById('map');
-                mapContainer.innerHTML = ''; 
-
-                const mapOptions = {
-                    center: new kakao.maps.LatLng(37.5665, 126.9780),
-                    level: 4
-                };
-
-                const map = new kakao.maps.Map(mapContainer, mapOptions);
-                const geocoder = new kakao.maps.services.Geocoder();
-
-                geocoder.addressSearch(address, function (result, status) {
-                    if (status === kakao.maps.services.Status.OK) {
-                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-                        
-                        map.setCenter(coords);
-
-                        const marker = new kakao.maps.Marker({
-                            map: map,
-                            position: coords
-                        });
-
-                        const infowindow = new kakao.maps.InfoWindow({
-                            content: `<div style="padding:5px; text-align: center;">${address}</div>`
-                        });
-                        infowindow.open(map, marker);
-
-                        const bounds = new kakao.maps.LatLngBounds();
-                        bounds.extend(coords);
-                        map.setBounds(bounds);
-
-                        document.getElementById('directionsBtn').onclick = () => {
-                            window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
-                        };
-                    } else {
-                        alert('해당 주소를 찾을 수 없습니다.');
-                    }
-                });
-            });
-       
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('resultsContainer').style.display = 'block';
+    }
     
+    function showError(message) {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('errorText').textContent = message;
+        document.getElementById('errorMessage').style.display = 'block';
+    }
 
-     // 전역 변수로 userId 선언
-        let userId;
+    function openMapModal(address) {
+        $('#mapModal').modal('show');
 
-        // 페이지 로드 시 userId 가져오기
-        document.addEventListener('DOMContentLoaded', function() {
-            // 여기서 userId를 가져오는 코드 구현
-            userId = document.getElementById('userIdField').value; // 예시
-            
-            fetchRecommendations();
+        $('#mapModal').on('shown.bs.modal', function () {
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = ''; 
 
-            $('#mapModal').on('hidden.bs.modal', function () {
-                $(this).off('shown.bs.modal');
-            });
-        });
+            const mapOptions = {
+                center: new kakao.maps.LatLng(37.5665, 126.9780),
+                level: 4
+            };
 
-        async function addFavorite(placeName, address) {
-            if (!userId) {
-                alert('로그인이 필요한 서비스입니다.');
-                return;
-            }
+            const map = new kakao.maps.Map(mapContainer, mapOptions);
+            const geocoder = new kakao.maps.services.Geocoder();
 
-            try {
-                const response = await axios.post('/api/favorites/add', {
-                    userId: userId,
-                    placeName: placeName,
-                    address: address
-                });
+            geocoder.addressSearch(address, function (result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    
+                    map.setCenter(coords);
 
-                if (response.data.success) {
-                    alert('즐겨찾기에 추가되었습니다.');
+                    const marker = new kakao.maps.Marker({
+                        map: map,
+                        position: coords
+                    });
+
+                    const infowindow = new kakao.maps.InfoWindow({
+                        content: `<div style="padding:5px; text-align: center;">${address}</div>`
+                    });
+                    infowindow.open(map, marker);
+
+                    const bounds = new kakao.maps.LatLngBounds();
+                    bounds.extend(coords);
+                    map.setBounds(bounds);
+
+                    document.getElementById('directionsBtn').onclick = () => {
+                        window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
+                    };
                 } else {
-                    alert(response.data.message);
+                    alert('해당 주소를 찾을 수 없습니다.');
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('즐겨찾기 추가 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 페이지 로드시 이벤트 리스너 추가
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchRecommendations();
-            
-            // 모달이 닫힐 때 이벤트 리스너 제거
-            $('#mapModal').on('hidden.bs.modal', function () {
-                $(this).off('shown.bs.modal');
             });
         });
+    }
 
+    async function addFavorite(placeName, address) {
+        if (!userId) {
+            alert('로그인이 필요한 서비스입니다.');
+            return;
         }
-        // 페이지 로드 후 결과 fetch
-        fetchRecommendations();
-    </script>
+
+        try {
+            const response = await axios.post('/api/favorites/add', {
+                userNo: userId,
+                placeName: placeName,
+                address: address
+            });
+
+            if (response.data === "즐겨찾기에 추가되었습니다.") {
+                alert('즐겨찾기에 추가되었습니다.');
+            } else {
+                alert(response.data);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('즐겨찾기 추가 중 오류가 발생했습니다.');
+        }
+    }
+</script>
+
 
 </body>
 </html>

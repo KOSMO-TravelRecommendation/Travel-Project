@@ -101,9 +101,11 @@
 <body>
     <!-- Alert Message -->
     <div th:if="${not #strings.isEmpty(message)}">
-        <script th:inline="javascript">
-            alert(/*[[${message}]]*/);
-        </script>
+       <script th:inline="javascript">
+        /*<![CDATA[*/
+        var userId = /*[[${user != null ? user.userNo : null}]]*/ null;
+        /*]]>*/
+    </script>
     </div>
 
     <!-- Navigation Bar -->
@@ -190,7 +192,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="mapModalLabel">상세 보기</h5>
+                    <h5 class="modal-title" id="mapModalLabel">지도 상세 보기</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -289,6 +291,10 @@
                                     ${place.score.toFixed(1)}점
                                 </div>
                                 <button class="btn btn-outline-primary btn-sm" onclick="openMapModal('${place.address}')">상세보기</button>
+                                <button class="btn btn-outline-success btn-sm" 
+                                    onclick="addFavorite('${place.place_name}', '${place.address}')">
+                                    즐겨찾기
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -299,112 +305,49 @@
             document.getElementById('loadingOverlay').style.display = 'none';
             document.getElementById('resultsContainer').style.display = 'block';
         }
-
+        
         function showError(message) {
             document.getElementById('loadingOverlay').style.display = 'none';
             document.getElementById('errorText').textContent = message;
             document.getElementById('errorMessage').style.display = 'block';
         }
+       
         function openMapModal(address) {
-            // 모달 표시
             $('#mapModal').modal('show');
 
-            // 카카오맵 컨테이너
-            const mapContainer = document.getElementById('map');
-            mapContainer.innerHTML = ''; // 이전 지도 초기화
-
-            const mapOptions = {
-                center: new kakao.maps.LatLng(37.5665, 126.9780), // 기본 좌표 (서울 시청)
-                level: 1 // 확대 레벨
-            };
-
-            const map = new kakao.maps.Map(mapContainer, mapOptions);
-
-            // 주소 검색 객체 생성
-            const geocoder = new kakao.maps.services.Geocoder();
-
-            // 주소를 좌표로 변환
-            geocoder.addressSearch(address, function (result, status) {
-                if (status === kakao.maps.services.Status.OK) {
-                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                    // 지도 중심을 마커 위치로 설정
-                    map.setCenter(coords);
-
-                    // 마커 생성
-                    const marker = new kakao.maps.Marker({
-                        map: map,
-                        position: coords
-                    });
-
-                    // 마커에 정보 창 추가
-                    const infowindow = new kakao.maps.InfoWindow({
-                        content: `<div style="padding:5px; text-align: center;">${address}</div>`
-                    });
-                    infowindow.open(map, marker);
-
-                    // 지도 범위 설정 (마커 위치를 고려해 지도 영역 재조정)
-                    const bounds = new kakao.maps.LatLngBounds();
-                    bounds.extend(coords); // 마커 위치를 기준으로 범위 확장
-                    map.setBounds(bounds); // 새로운 범위로 지도 영역 조정
-
-                    // 길 찾기 버튼 클릭 시 카카오맵으로 길 찾기
-                    const directionsBtn = document.getElementById('directionsBtn');
-                    directionsBtn.onclick = () => {
-                        window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
-                    };
-                } else {
-                    alert('해당 주소를 찾을 수 없습니다.');
-                }
-            });
-        }
-        function openMapModal(address) {
-            // 모달 표시
-            $('#mapModal').modal('show');
-
-            // 모달이 열린 후에 지도 크기를 재조정하여 모달에 맞게 표시
             $('#mapModal').on('shown.bs.modal', function () {
                 const mapContainer = document.getElementById('map');
-                mapContainer.innerHTML = ''; // 이전 지도 초기화
+                mapContainer.innerHTML = ''; 
 
                 const mapOptions = {
-                    center: new kakao.maps.LatLng(37.5665, 126.9780), // 기본 좌표 (서울 시청)
-                    level: 4 // 기본 확대 레벨
+                    center: new kakao.maps.LatLng(37.5665, 126.9780),
+                    level: 4
                 };
 
                 const map = new kakao.maps.Map(mapContainer, mapOptions);
-
-                // 주소 검색 객체 생성
                 const geocoder = new kakao.maps.services.Geocoder();
 
-                // 주소를 좌표로 변환
                 geocoder.addressSearch(address, function (result, status) {
                     if (status === kakao.maps.services.Status.OK) {
                         const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                        // 지도 중심을 마커 위치로 설정
+                        
                         map.setCenter(coords);
 
-                        // 마커 생성
                         const marker = new kakao.maps.Marker({
                             map: map,
                             position: coords
                         });
 
-                        // 마커에 정보 창 추가
                         const infowindow = new kakao.maps.InfoWindow({
                             content: `<div style="padding:5px; text-align: center;">${address}</div>`
                         });
                         infowindow.open(map, marker);
 
-                        // 현재 화면 중심을 기준으로 지도 확대 및 위치 조정
                         const bounds = new kakao.maps.LatLngBounds();
-                        bounds.extend(coords); // 마커 위치를 기준으로 범위 확장
-                        map.setBounds(bounds); // 새로운 범위로 지도 영역 재조정
+                        bounds.extend(coords);
+                        map.setBounds(bounds);
 
-                        // 길 찾기 버튼 클릭 시 카카오맵으로 길 찾기
-                        const directionsBtn = document.getElementById('directionsBtn');
-                        directionsBtn.onclick = () => {
+                        document.getElementById('directionsBtn').onclick = () => {
                             window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
                         };
                     } else {
@@ -414,6 +357,54 @@
             });
         }
 
+     // 전역 변수로 userId 선언
+        let userId;
+
+        // 페이지 로드 시 userId 가져오기
+        document.addEventListener('DOMContentLoaded', function() {
+            // 여기서 userId를 가져오는 코드 구현
+            userId = document.getElementById('userIdField').value; // 예시
+            
+            fetchRecommendations();
+
+            $('#mapModal').on('hidden.bs.modal', function () {
+                $(this).off('shown.bs.modal');
+            });
+        });
+
+        async function addFavorite(placeName, address) {
+            if (!userId) {
+                alert('로그인이 필요한 서비스입니다.');
+                return;
+            }
+
+            try {
+                const response = await axios.post('/api/favorites/add', {
+                    userId: userId,
+                    placeName: placeName,
+                    address: address
+                });
+
+                if (response.data.success) {
+                    alert('즐겨찾기에 추가되었습니다.');
+                } else {
+                    alert(response.data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('즐겨찾기 추가 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 페이지 로드시 이벤트 리스너 추가
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchRecommendations();
+            
+            // 모달이 닫힐 때 이벤트 리스너 제거
+            $('#mapModal').on('hidden.bs.modal', function () {
+                $(this).off('shown.bs.modal');
+            });
+        });
 
         // 페이지 로드 후 결과 fetch
         fetchRecommendations();

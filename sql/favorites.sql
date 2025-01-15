@@ -1,11 +1,8 @@
-CREATE TABLE `favorites` (
-    `favoriteNo` INT NOT NULL AUTO_INCREMENT,
-    `userNo` INT NOT NULL,
-    `attractionName` VARCHAR(255) NOT NULL DEFAULT '' COLLATE 'utf8mb4_0900_ai_ci',
-    `addedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`favoriteNo`) USING BTREE,
-    CONSTRAINT `fk_favorites_users` FOREIGN KEY (`userNo`) REFERENCES `users`(`userNo`) ON DELETE CASCADE ON UPDATE CASCADE
-)
-COLLATE='utf8mb4_0900_ai_ci'
-ENGINE=InnoDB
-AUTO_INCREMENT=1;
+CREATE TABLE favorites (
+    favorite_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    place_name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(userNo)
+);

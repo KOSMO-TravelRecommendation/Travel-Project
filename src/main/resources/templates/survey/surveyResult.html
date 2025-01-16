@@ -95,14 +95,19 @@
         }
         
     </style>
+    <!-- 카카오맵 API -->
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d0d50c9d3015d393b7632551eff16da0&libraries=services"></script>
 </head>
 
 <body>
+	<input type="hidden" id="userNoField" th:value="${user != null ? user.userNo : null}">
     <!-- Alert Message -->
     <div th:if="${not #strings.isEmpty(message)}">
-        <script th:inline="javascript">
-            alert(/*[[${message}]]*/);
-        </script>
+      <script th:inline="javascript">
+    var userNo = /*[[${user != null ? user.userNo : null}]]*/ null;
+    console.log('userNo from server:', userNo); // 값 확인
+</script>
+
     </div>
 
     <!-- Navigation Bar -->
@@ -179,8 +184,30 @@
 
     <!-- 결과 컨테이너 -->
     <div id="resultsContainer" class="container py-5" style="display: none;">
-        <div class="row g-4" id="recommendationsContainer">s
+        <div class="row g-4" id="recommendationsContainer">
             <!-- 결과가 여기에 동적으로 추가됩니다 -->
+        </div>
+    </div>
+
+    <!-- 지도 모달 -->
+    <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">지도 상세 보기</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="map" style="width: 100%; height: 400px;"></div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="directionsBtn">길 찾기</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                    
+                </div>
+            </div>
         </div>
     </div>
 
@@ -188,11 +215,13 @@
     <footer class="footer text-center">
         <div class="container">
             <p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
+            <div class="social-links mt-3">
+                <a href="#" class="text-white mx-2"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-white mx-2"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-white mx-2"><i class="fab fa-twitter"></i></a>
+            </div>
         </div>
     </footer>
-
-    <!-- Modal Container -->
-    <div id="modalContainer"></div>
 
     <!-- jQuery, Popper.js, Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -201,112 +230,175 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <!-- Custom Scripts -->
-    <script>
-        const placeTypes = {
-            1: '자연 관광지',
-            2: '자연 휴양지',
-            3: '문화 유적지',
-            4: '박물관/미술관',
-            5: '체험 관광지',
-            6: '액티비티',
-            7: '쇼핑/맛집',
-            8: '기타'
-        };
+<script>
+    const placeTypes = {
+        1: '자연 관광지',
+        2: '자연 휴양지',
+        3: '문화 유적지',
+        4: '박물관/미술관',
+        5: '체험 관광지',
+        6: '액티비티',
+        7: '쇼핑/맛집',
+        8: '기타'
+    };
 
-        async function fetchRecommendations() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const modelType = urlParams.get('model');
+    let userNo = null;
 
-                const surveyResponse = await axios.get('/api/survey/latest');
-                const surveyData = surveyResponse.data;
+	// 페이지 로드 시 userNo 가져오기
+	document.addEventListener('DOMContentLoaded', function() {
+	    // userNo를 안전하게 가져오는 코드
+	    const userNoField = document.getElementById('userNoField');
+	    userNo = userNoField ? parseInt(userNoField.value) : null;
 
-                if (!surveyData.inputs) {
-                    throw new Error('설문 데이터를 찾을 수 없습니다.');
-                }
+	    fetchRecommendations();
+	    
+	    $('#mapModal').on('hidden.bs.modal', function () {
+	        $(this).off('shown.bs.modal');
+	    });
+	});
 
-                const predictionResponse = await axios.post('http://localhost:5000/predict', {
-                    survey_data: surveyData.inputs,
-                    model_type: modelType
-                });
+    async function fetchRecommendations() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const modelType = urlParams.get('model') || 'defaultModel'; // 기본값 설정
 
-                if (!predictionResponse.data.recommendations) {
-                    throw new Error('추천 결과를 받아오지 못했습니다.');
-                }
+            const surveyResponse = await axios.get('/api/survey/latest');
+            const surveyData = surveyResponse.data;
 
-                await axios.post('/api/survey/predictions', {
-                    predictions: predictionResponse.data.recommendations
-                });
-
-                displayResults(predictionResponse.data.recommendations);
-            } catch (error) {
-                console.error('Error:', error);
-                showError(error.message || '추천 처리 중 오류가 발생했습니다.');
+            if (!surveyData.inputs) {
+                throw new Error('설문 데이터를 찾을 수 없습니다.');
             }
+
+            const predictionResponse = await axios.post('http://localhost:5000/predict', {
+                survey_data: surveyData.inputs,
+                model_type: modelType
+            });
+
+            if (!predictionResponse.data.recommendations) {
+                throw new Error('추천 결과를 받아오지 못했습니다.');
+            }
+
+            await axios.post('/api/survey/predictions', {
+                predictions: predictionResponse.data.recommendations
+            });
+
+            displayResults(predictionResponse.data.recommendations);
+        } catch (error) {
+            console.error('Error:', error);
+            showError(error.message || '추천 처리 중 오류가 발생했습니다.');
         }
+    }
 
-        function displayResults(recommendations) {
-            const container = document.getElementById('recommendationsContainer');
-            container.innerHTML = '';
+    function displayResults(recommendations) {
+        const container = document.getElementById('recommendationsContainer');
+        container.innerHTML = '';
 
-            recommendations.forEach(place => {
-                const placeElement = document.createElement('div');
-                placeElement.className = 'col-md-6 col-lg-4 mb-4';
-                placeElement.innerHTML = `
-                    <div class="card h-100 shadow-sm hover-shadow">
-                        <div class="card-body">
-                            <span class="card-type">${placeTypes[place.type]}</span>
-                            <h3 class="card-title h5">${place.place_name}</h3>
-                            <p class="card-address">${place.address}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="card-score">
-                                    <i class="fas fa-star text-warning"></i>
-                                    ${place.score.toFixed(1)}점
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm">상세보기</button>
+        recommendations.forEach(place => {
+            const placeElement = document.createElement('div');
+            placeElement.className = 'col-md-6 col-lg-4 mb-4';
+            placeElement.innerHTML = `
+                <div class="card h-100 shadow-sm hover-shadow">
+                    <div class="card-body">
+                        <span class="card-type">${placeTypes[place.type]}</span>
+                        <h3 class="card-title h5">${place.place_name}</h3>
+                        <p class="card-address">${place.address}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="card-score">
+                                <i class="fas fa-star text-warning"></i>
+                                ${place.score.toFixed(1)}점
                             </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="openMapModal('${place.address}')">상세보기</button>
+                            <button class="btn btn-outline-success btn-sm" onclick="addFavorite('${place.place_name}', '${place.address}')">
+                                즐겨찾기
+                            </button>
                         </div>
                     </div>
-                `;
-                container.appendChild(placeElement);
-            });
-
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('resultsContainer').style.display = 'block';
-        }
-
-        function showError(message) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('errorText').textContent = message;
-            document.getElementById('errorMessage').style.display = 'block';
-        }
-
-        // 모달 관련 스크립트
-        $(document).ready(function () {
-            $('#signupLink').click(function (event) {
-                event.preventDefault();
-                $('#signupModal').remove();
-                $.get('/user/signup', function (data) {
-                    $('#modalContainer').html(data);
-                    $('#signupModal').modal('show');
-                });
-            });
-       
-    
-
-            $('#loginLink').click(function (event) {
-                event.preventDefault();
-                $('#loginModal').remove();
-                $.get('/user/login', function (data) {
-                    $('#modalContainer').html(data);
-                    $('#loginModal').modal('show');
-                });
-            });
+                </div>
+            `;
+            container.appendChild(placeElement);
         });
 
-        // 페이지 로드 시 실행
-        window.addEventListener('DOMContentLoaded', fetchRecommendations);
-    </script>
-</body>
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('resultsContainer').style.display = 'block';
+    }
+    
+    function showError(message) {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('errorText').textContent = message;
+        document.getElementById('errorMessage').style.display = 'block';
+    }
 
+    function openMapModal(address) {
+        $('#mapModal').modal('show');
+
+        $('#mapModal').on('shown.bs.modal', function () {
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = ''; 
+
+            const mapOptions = {
+                center: new kakao.maps.LatLng(37.5665, 126.9780),
+                level: 4
+            };
+
+            const map = new kakao.maps.Map(mapContainer, mapOptions);
+            const geocoder = new kakao.maps.services.Geocoder();
+
+            geocoder.addressSearch(address, function (result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    
+                    map.setCenter(coords);
+
+                    const marker = new kakao.maps.Marker({
+                        map: map,
+                        position: coords
+                    });
+
+                    const infowindow = new kakao.maps.InfoWindow({
+                        content: `<div style="padding:5px; text-align: center;">${address}</div>`
+                    });
+                    infowindow.open(map, marker);
+
+                    const bounds = new kakao.maps.LatLngBounds();
+                    bounds.extend(coords);
+                    map.setBounds(bounds);
+
+                    document.getElementById('directionsBtn').onclick = () => {
+                        window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
+                    };
+                } else {
+                    alert('해당 주소를 찾을 수 없습니다.');
+                }
+            });
+        });
+    }
+    
+
+	async function addFavorite(placeName, address) {
+	    if (!userNo) {
+	        alert('로그인이 필요한 서비스입니다.');
+	        return;
+	    }
+
+	    try {
+	        const response = await axios.post('/api/survey/favorites/add', {
+	            userNo: userNo,
+	            placeName: placeName,
+	            address: address
+	        });
+
+	        if (response.data.status === "success") {
+	            alert('즐겨찾기에 추가되었습니다.');
+	        } else {
+	            alert(response.data.message || '즐겨찾기 추가에 실패했습니다.');
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('즐겨찾기 추가 중 오류가 발생했습니다.');
+	    }
+	}
+</script>
+
+
+</body>
 </html>

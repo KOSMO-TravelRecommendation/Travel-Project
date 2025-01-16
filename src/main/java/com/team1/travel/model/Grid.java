@@ -15,4 +15,5 @@ public class Grid {
     private double longitude;
     private double latitude;
     private String region;
+    private String subRegion;
 }

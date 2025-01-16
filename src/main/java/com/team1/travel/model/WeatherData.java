@@ -14,4 +14,5 @@ public class WeatherData {
     private String sky;
     private String precipitation;
     private String rainProbability;
+    private String location;
 }

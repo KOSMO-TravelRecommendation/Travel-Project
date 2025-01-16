@@ -1,4 +1,15 @@
-$('#weatherBtn').click(function() {
+// weather.js
+function loadWeatherData() {
+    const weatherBox = document.querySelector('.weather-widget'); // 클래스명 수정
+    if (!weatherBox) return; // 요소가 없을 경우 처리
+    
+    const refreshButton = weatherBox.querySelector('.refresh-weather');
+    if (!refreshButton) return; // 요소가 없을 경우 처리
+    
+    // 새로고침 버튼 비활성화 및 로딩 표시
+    refreshButton.disabled = true;
+    refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
@@ -8,61 +19,101 @@ $('#weatherBtn').click(function() {
                 // 날씨 정보를 가져오는 API 호출
                 $.get(`/weather?lat=${latitude}&lon=${longitude}`, function(data) {
                     if (data.error) {
-                        alert(data.error);
-                        return;
+                        showWeatherError(data.error);
+                    } else {
+                        updateWeatherBox(data);
                     }
-
-                    const weatherHtml = `
-                    <div class="modal fade" id="weatherModal" tabindex="-1" role="dialog">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">현재 날씨 정보</h5>
-                                    <button type="button" class="close" data-dismiss="modal">
-                                        <span>&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="weather-info">
-                                        <p><i class="fas fa-calendar"></i> ${data.date}</p>
-                                        <p><i class="fas fa-cloud"></i> 날씨: ${data.weather}</p>
-                                        <p><i class="fas fa-temperature-high"></i> 현재 기온: ${data.temperature}°C</p>
-                                        <p><i class="fas fa-tint"></i> 강수확률: ${data.rainProbability}%</p>
-                                        <p><i class="fas fa-map-marker-alt"></i> ${data.location}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    `;
-
-                    // 기존 날씨 모달 제거 후 새로 추가
-                    $('#weatherModal').remove();
-                    $('body').append(weatherHtml);
-                    $('#weatherModal').modal('show');
                 })
                 .fail(function(error) {
-                    alert('날씨 정보를 가져오는데 실패했습니다.');
+                    showWeatherError('날씨 정보를 가져오는데 실패했습니다.');
+                })
+                .always(function() {
+                    // 새로고침 버튼 복원
+                    refreshButton.disabled = false;
+                    refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
                 });
             },
             function(error) {
+                let errorMessage;
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        alert("위치 정보 접근을 허용해주세요.");
+                        errorMessage = "위치 정보 접근을 허용해주세요.";
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        alert("위치 정보를 가져올 수 없습니다.");
+                        errorMessage = "위치 정보를 가져올 수 없습니다.";
                         break;
                     case error.TIMEOUT:
-                        alert("요청이 시간 초과되었습니다.");
+                        errorMessage = "요청이 시간 초과되었습니다.";
                         break;
                     default:
-                        alert("알 수 없는 오류가 발생했습니다.");
-                        break;
+                        errorMessage = "알 수 없는 오류가 발생했습니다.";
                 }
+                showWeatherError(errorMessage);
+                // 새로고침 버튼 복원
+                refreshButton.disabled = false;
+                refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
             }
         );
     } else {
-        alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+        showWeatherError("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+        // 새로고침 버튼 복원
+        refreshButton.disabled = false;
+        refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
+    }
+}
+
+function showWeatherError(message) {
+    const weatherBox = document.querySelector('.weather-widget'); // 클래스명 수정
+    if (!weatherBox) return;
+    const weatherInfo = weatherBox.querySelector('.weather-info');
+    if (!weatherInfo) return;
+    
+    weatherInfo.innerHTML = `
+        <p class="feature-text text-danger">${message}</p>
+    `;
+}
+
+function updateWeatherBox(data) {
+    const weatherBox = document.querySelector('.weather-widget');
+    if (!weatherBox) return;
+    const weatherInfo = weatherBox.querySelector('.weather-info');
+    if (!weatherInfo) return;
+
+    weatherInfo.innerHTML = `
+        <div class="weather-main">
+            <div class="weather-temp">
+                <span class="temp-value">${data.temperature}</span>
+                <span class="temp-unit">°C</span>
+            </div>
+            <div class="weather-condition">
+                <i class="fas fa-cloud"></i>
+                <span>${data.weather}</span>
+            </div>
+        </div>
+        <div class="weather-details">
+            <div class="weather-detail">
+                <i class="fas fa-tint"></i>
+                <span>${data.rainProbability}%</span>
+            </div>
+            <div class="weather-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>${data.location}</span>
+            </div>
+            <div class="weather-detail">
+                <i class="fas fa-calendar"></i>
+                <span>${data.date}</span>
+            </div>
+        </div>
+    `;
+}
+
+// DOM이 완전히 로드된 후에 실행
+document.addEventListener('DOMContentLoaded', function() {
+    loadWeatherData();
+    
+    // 새로고침 버튼 클릭 이벤트 추가
+    const refreshButton = document.querySelector('.refresh-weather');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', loadWeatherData);
     }
 });

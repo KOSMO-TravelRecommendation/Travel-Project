@@ -103,7 +103,8 @@
     <!-- Alert Message -->
     <div th:if="${not #strings.isEmpty(message)}">
       <script th:inline="javascript">
-    var userId = /*[[${user != null ? user.userNo : null}]]*/ null;
+    var userNo = /*[[${user != null ? user.userNo : null}]]*/ null;
+    console.log('userNo from server:', userNo); // 값 확인
 </script>
 
     </div>
@@ -369,16 +370,19 @@
             });
         });
     }
+    
 
     async function addFavorite(placeName, address) {
-        if (!userId) {
+    	console.log(placeName,address);
+    	
+        if (!userNo) {
             alert('로그인이 필요한 서비스입니다.');
             return;
         }
 
         try {
             const response = await axios.post('/api/favorites/add', {
-                userNo: userId,
+                userNo: userNo,
                 placeName: placeName,
                 address: address
             });

@@ -10,7 +10,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import com.team1.travel.model.WeatherData;
 import com.team1.travel.model.Grid;
-import org.apache.poi.openxml4j.util.ZipSecureFile;
 
 import java.io.InputStream;
 import java.io.BufferedReader;
@@ -31,6 +30,7 @@ public class WeatherService {
     private static final String API_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
     private final String apiKey;
     private final List<Grid> gridList;
+    private static final double EARTH_RADIUS = 6371.0; // 지구의 반지름 (km)
 
     public static final Map<String, String> STATUS_OF_SKY = Map.of(
         "1", "맑음",
@@ -54,7 +54,8 @@ public class WeatherService {
     private List<Grid> loadGridData() {
         List<Grid> grids = new ArrayList<>();
         try {
-            InputStream is = new ClassPathResource("static/xls/RealweatherXY.xlsx").getInputStream();
+            System.out.println("Starting to load grid data...");
+            InputStream is = new ClassPathResource("static/xls/FinalWeatherXY.xlsx").getInputStream();
             Workbook workbook = WorkbookFactory.create(is);
             Sheet sheet = workbook.getSheetAt(0);
 
@@ -62,42 +63,60 @@ public class WeatherService {
                 Row row = sheet.getRow(i);
                 if (row != null) {
                     try {
-                        String region = row.getCell(2).getStringCellValue();  // 1단계 (시/도)
+                        // 1단계 (시/도) 읽기
+                        Cell regionCell = row.getCell(2);
+                        if (regionCell == null) continue;
+                        String region = regionCell.getStringCellValue().trim();
+                        if (region.isEmpty()) continue;
                         
-                        // 격자 좌표 읽기
-                        int nx = (int) row.getCell(3).getNumericCellValue();  // 격자 X
-                        int ny = (int) row.getCell(4).getNumericCellValue();  // 격자 Y
+                        // 2단계 (시/군/구) 읽기
+                        Cell subRegionCell = row.getCell(3);
+                        String subRegion = null;
+                        if (subRegionCell != null && subRegionCell.getCellType() == CellType.STRING) {
+                            String subRegionValue = subRegionCell.getStringCellValue().trim();
+                            if (!subRegionValue.isEmpty()) {
+                                subRegion = subRegionValue;
+                            }
+                        }
                         
-                        // 경도 계산 (시, 분, 초)
-                        int lonDegrees = (int) row.getCell(5).getNumericCellValue();
-                        int lonMinutes = (int) row.getCell(6).getNumericCellValue();
-                        double lonSeconds = row.getCell(7).getNumericCellValue();
+                        // nx, ny 읽기
+                        Cell nxCell = row.getCell(4);
+                        Cell nyCell = row.getCell(5);
+                        if (nxCell == null || nyCell == null) continue;
                         
-                        // 위도 계산 (시, 분, 초)
-                        int latDegrees = (int) row.getCell(8).getNumericCellValue();
-                        int latMinutes = (int) row.getCell(9).getNumericCellValue();
-                        double latSeconds = row.getCell(10).getNumericCellValue();
+                        int nx = (int) nxCell.getNumericCellValue();
+                        int ny = (int) nyCell.getNumericCellValue();
                         
-                        double longitude = convertDMSToDecimal(lonDegrees, lonMinutes, lonSeconds);
-                        double latitude = convertDMSToDecimal(latDegrees, latMinutes, latSeconds);
+                        // nx나 ny가 0인 행은 건너뛰기
+                        if (nx == 0 || ny == 0) continue;
+                        
+                        // 위도 경도 읽기
+                        double longitude = row.getCell(6).getNumericCellValue();
+                        double latitude = row.getCell(8).getNumericCellValue();
                         
                         Grid grid = Grid.builder()
                                 .nx(nx)
                                 .ny(ny)
                                 .longitude(longitude)
                                 .latitude(latitude)
-                                .region(region)  // 지역 이름 저장
+                                .region(region)
+                                .subRegion(subRegion)
                                 .build();
                         
-                        System.out.println("Loaded grid for " + region + ": nx=" + nx + ", ny=" + ny + 
-                                         ", lat=" + latitude + ", lon=" + longitude);
+                        System.out.println(String.format("Loaded grid for %s %s: nx=%d, ny=%d, lat=%.2f, lon=%.2f",
+                            region, 
+                            subRegion != null ? subRegion : "",
+                            nx, ny, latitude, longitude));
                         
                         grids.add(grid);
+                        
                     } catch (Exception e) {
                         System.out.println("Error processing row " + i + ": " + e.getMessage());
                     }
                 }
             }
+            
+            System.out.println("Total loaded grids: " + grids.size());
             workbook.close();
             is.close();
             
@@ -106,44 +125,6 @@ public class WeatherService {
             e.printStackTrace();
         }
         return grids;
-    }
-
-    private int getCellValueAsInt(Cell cell) {
-        if (cell == null) return 0;
-        
-        switch (cell.getCellType()) {
-            case NUMERIC:
-                return (int) cell.getNumericCellValue();
-            case STRING:
-                try {
-                    return Integer.parseInt(cell.getStringCellValue().trim());
-                } catch (NumberFormatException e) {
-                    return 0;
-                }
-            default:
-                return 0;
-        }
-    }
-
-    private double getCellValueAsDouble(Cell cell) {
-        if (cell == null) return 0.0;
-        
-        switch (cell.getCellType()) {
-            case NUMERIC:
-                return cell.getNumericCellValue();
-            case STRING:
-                try {
-                    return Double.parseDouble(cell.getStringCellValue().trim());
-                } catch (NumberFormatException e) {
-                    return 0.0;
-                }
-            default:
-                return 0.0;
-        }
-    }
-
-    private double convertDMSToDecimal(int degrees, int minutes, double seconds) {
-        return degrees + (minutes / 60.0) + (seconds / 3600.0);
     }
 
     public Grid findNearestGrid(double lat, double lon) {
@@ -158,16 +139,24 @@ public class WeatherService {
             if (distance < minDistance) {
                 minDistance = distance;
                 nearest = grid;
-                System.out.println("New nearest found: " + grid.getRegion() + 
-                                 " (nx=" + grid.getNx() + ", ny=" + grid.getNy() + 
-                                 ", distance=" + distance + "km)");
+                String location = grid.getRegion();
+            if (grid.getSubRegion() != null) {
+                location += " " + grid.getSubRegion();
+            }
+            System.out.println("New nearest found: " + location + 
+                             " (nx=" + grid.getNx() + ", ny=" + grid.getNy() + 
+                             ", distance=" + distance + "km)");
             }
         }
         
         if (nearest != null) {
             System.out.println("\nSelected Location:");
             System.out.println("- Input: lat=" + lat + ", lon=" + lon);
-            System.out.println("- Nearest region: " + nearest.getRegion());
+            String location = nearest.getRegion();
+            if (nearest.getSubRegion() != null) {
+                location += " " + nearest.getSubRegion();
+            }
+            System.out.println("- Nearest region: " + location);
             System.out.println("- Grid Point: nx=" + nearest.getNx() + ", ny=" + nearest.getNy());
             System.out.println("- Distance: " + minDistance + "km");
         }
@@ -198,14 +187,12 @@ public class WeatherService {
             }
 
             ZonedDateTime currentTimeKst = ZonedDateTime.now();
-            // 가장 최근의 base_time을 찾는 로직
             String baseDate;
             String baseTime;
             
             int hour = currentTimeKst.getHour();
             int[] availableTimes = {2, 5, 8, 11, 14, 17, 20, 23};
             
-            // 현재 시간보다 작은 가장 큰 available time 찾기
             int baseHour = -1;
             for (int i = availableTimes.length - 1; i >= 0; i--) {
                 if (hour >= availableTimes[i]) {
@@ -214,7 +201,6 @@ public class WeatherService {
                 }
             }
             
-            // 만약 현재 시간이 02시 이전이라면 전날 23시 데이터를 사용
             if (baseHour == -1) {
                 baseDate = currentTimeKst.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
                 baseTime = "2300";
@@ -227,10 +213,12 @@ public class WeatherService {
             String jsonResponse = fetchDataFromApi(urlString);
             
             if (jsonResponse == null) {
+                System.out.println("No response received from API");
                 return Optional.empty();
             }
 
-            return parseWeatherData(jsonResponse);
+            System.out.println("\nAPI Response received. Length: " + jsonResponse.length() + " characters");
+            return parseWeatherData(jsonResponse, nearestGrid);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -281,19 +269,31 @@ public class WeatherService {
         }
     }
 
-    private Optional<WeatherData> parseWeatherData(String jsonStr) {
-        try {
-            System.out.println("Received JSON: " + jsonStr);
+    private Optional<WeatherData> parseWeatherData(String jsonStr, Grid grid) {
+        System.out.println("\nParsing weather data...");
+        System.out.println("JSON Response: " + jsonStr);
 
+        try {
             JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject();
             if (!jsonObject.has("response")) {
-                System.out.println("No 'response' field found in JSON");
                 return Optional.empty();
             }
             
             JsonObject response = jsonObject.getAsJsonObject("response");
+            if (response == null || !response.has("body")) {
+                return Optional.empty();
+            }
+
             JsonObject body = response.getAsJsonObject("body");
+            if (body == null || !body.has("items")) {
+                return Optional.empty();
+            }
+
             JsonObject items = body.getAsJsonObject("items");
+            if (items == null || !items.has("item")) {
+                return Optional.empty();
+            }
+
             JsonArray itemArray = items.getAsJsonArray("item");
 
             String temp = null;
@@ -309,29 +309,37 @@ public class WeatherService {
                 switch (category) {
                     case "TMP":
                         temp = value;
+                        System.out.println("Temperature: " + value + "°C");
                         break;
                     case "SKY":
                         sky = STATUS_OF_SKY.getOrDefault(value, "알 수 없음");
+                        System.out.println("Sky condition: " + sky + " (code: " + value + ")");
                         break;
                     case "PTY":
                         pty = STATUS_OF_PRECIPITATION.getOrDefault(value, "알 수 없음");
+                        System.out.println("Precipitation: " + pty + " (code: " + value + ")");
                         break;
                     case "POP":
                         pop = value;
+                        System.out.println("Precipitation probability: " + value + "%");
                         break;
                 }
             }
 
             if (temp != null && sky != null && pty != null && pop != null) {
+                String location = grid.getSubRegion() != null ? 
+                               grid.getRegion() + " " + grid.getSubRegion() : 
+                               grid.getRegion();
+                               
                 return Optional.of(WeatherData.builder()
                         .temperature(temp)
-                        .sky(sky)           // 이미 매핑된 문자열
-                        .precipitation(pty)  // 이미 매핑된 문자열
+                        .sky(sky)
+                        .precipitation(pty)
                         .rainProbability(pop)
+                        .location(location)
                         .build());
             }
         } catch (Exception e) {
-            System.out.println("Error parsing JSON: " + e.getMessage());
             e.printStackTrace();
         }
         return Optional.empty();

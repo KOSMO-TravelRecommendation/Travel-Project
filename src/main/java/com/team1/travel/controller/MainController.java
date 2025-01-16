@@ -57,8 +57,8 @@ public class MainController {
 	@GetMapping("/weather")
 	@ResponseBody
 	public Map<String, String> getWeatherInfo(
-	    @RequestParam("lat") double latitude,
-	    @RequestParam("lon") double longitude) {
+	        @RequestParam("lat") double latitude,
+	        @RequestParam("lon") double longitude) {
 
 	    Map<String, String> response = new HashMap<>();
 
@@ -69,21 +69,26 @@ public class MainController {
 	        if (weatherData.isPresent()) {
 	            WeatherData data = weatherData.get();
 	            response.put("date", ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
-	                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 EEEE", Locale.KOREAN)));
-	            
+	                    .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 EEEE", Locale.KOREAN)));
+
 	            // 날씨 상태와 강수 형태를 결합
 	            String weatherStatus;
 	            if (data.getPrecipitation().equals("없음")) {
-	                weatherStatus = data.getSky();  // 강수가 없으면 하늘 상태만 표시
+	                weatherStatus = data.getSky(); // 강수가 없으면 하늘 상태만 표시
 	            } else {
-	                weatherStatus = data.getSky() + "(" + data.getPrecipitation() + ")";  // 강수가 있으면 둘 다 표시
+	                weatherStatus = data.getSky() + "(" + data.getPrecipitation() + ")"; // 강수가 있으면 둘 다 표시
 	            }
-	            
+
 	            response.put("weather", weatherStatus);
 	            response.put("temperature", data.getTemperature());
 	            response.put("rainProbability", data.getRainProbability());
+	            
 	            Grid nearestGrid = weather.findNearestGrid(latitude, longitude);
-	            response.put("location", nearestGrid.getRegion());
+	            // subRegion이 있다면 함께 포함
+	            String location = nearestGrid.getSubRegion() != null 
+	                ? nearestGrid.getRegion() + " " + nearestGrid.getSubRegion() 
+	                : nearestGrid.getRegion();
+	            response.put("location", location);
 	        } else {
 	            response.put("error", "날씨 정보를 가져오지 못했습니다.");
 	        }

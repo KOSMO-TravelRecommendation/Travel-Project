@@ -113,16 +113,5 @@ public class MainController {
 		return "recommend";
 	}
 
-	// AI 추천 설문조사 페이지
-	@GetMapping("recommendation/survey")
-	public String surveyform(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-		UserVo user = (UserVo) session.getAttribute("loggedInUser");
-		if (user == null) {
-			redirectAttributes.addFlashAttribute("message", "로그인이 필요한 서비스입니다.");
-			return "redirect:/"; // 홈으로 리다이렉트
-		}
-		model.addAttribute("user", user);
-		return "survey/surveyform";
-	}
 
 }

@@ -167,12 +167,19 @@
 			});
 
 			$('#surveyLink').click(function (event) {
-				event.preventDefault();
-				$('#surveyModal').remove();
-				$.get('/survey/form', function (data) {
-					$('#modalContainer').html(data);
-					$('#surveyModal').modal('show');
-				});
+			    event.preventDefault();
+			    $('#surveyModal').remove();
+			    $.get('/survey/form', function (data) {
+			        $('#modalContainer').html(data);
+			        
+			        // 기존 스크립트 태그 제거 후 재로드
+			        $('script[src$="survey.js"]').remove();
+			        const scriptTag = document.createElement('script');
+			        scriptTag.src = '/path/to/survey.js';
+			        document.body.appendChild(scriptTag);
+			        
+			        $('#surveyModal').modal('show');
+			    });
 			});
 
 			$('#editProfileLink').click(function (event) {

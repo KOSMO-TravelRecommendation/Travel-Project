@@ -100,6 +100,7 @@
 </head>
 
 <body>
+	<input type="hidden" id="userNoField" th:value="${user != null ? user.userNo : null}">
     <!-- Alert Message -->
     <div th:if="${not #strings.isEmpty(message)}">
       <script th:inline="javascript">
@@ -183,7 +184,7 @@
 
     <!-- 결과 컨테이너 -->
     <div id="resultsContainer" class="container py-5" style="display: none;">
-        <div class="row g-4" id="recommendationsContainer">s
+        <div class="row g-4" id="recommendationsContainer">
             <!-- 결과가 여기에 동적으로 추가됩니다 -->
         </div>
     </div>
@@ -214,6 +215,11 @@
     <footer class="footer text-center">
         <div class="container">
             <p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
+            <div class="social-links mt-3">
+                <a href="#" class="text-white mx-2"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-white mx-2"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-white mx-2"><i class="fab fa-twitter"></i></a>
+            </div>
         </div>
     </footer>
 
@@ -236,19 +242,20 @@
         8: '기타'
     };
 
-    let userId;
+    let userNo = null;
 
-    // 페이지 로드 시 userId 가져오기
-    document.addEventListener('DOMContentLoaded', function() {
-        // 예시로 userId를 DOM에서 가져오는 코드
-        userId = document.getElementById('userIdField')?.value || null;
+	// 페이지 로드 시 userNo 가져오기
+	document.addEventListener('DOMContentLoaded', function() {
+	    // userNo를 안전하게 가져오는 코드
+	    const userNoField = document.getElementById('userNoField');
+	    userNo = userNoField ? parseInt(userNoField.value) : null;
 
-        fetchRecommendations();
-        
-        $('#mapModal').on('hidden.bs.modal', function () {
-            $(this).off('shown.bs.modal');
-        });
-    });
+	    fetchRecommendations();
+	    
+	    $('#mapModal').on('hidden.bs.modal', function () {
+	        $(this).off('shown.bs.modal');
+	    });
+	});
 
     async function fetchRecommendations() {
         try {
@@ -367,31 +374,29 @@
     }
     
 
-    async function addFavorite(placeName, address) {
-    	console.log(placeName,address);
-    	
-        if (!userNo) {
-            alert('로그인이 필요한 서비스입니다.');
-            return;
-        }
+	async function addFavorite(placeName, address) {
+	    if (!userNo) {
+	        alert('로그인이 필요한 서비스입니다.');
+	        return;
+	    }
 
-        try {
-            const response = await axios.post('/api/favorites/add', {
-                userNo: userNo,
-                placeName: placeName,
-                address: address
-            });
+	    try {
+	        const response = await axios.post('/api/survey/favorites/add', {
+	            userNo: userNo,
+	            placeName: placeName,
+	            address: address
+	        });
 
-            if (response.data === "즐겨찾기에 추가되었습니다.") {
-                alert('즐겨찾기에 추가되었습니다.');
-            } else {
-                alert(response.data);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('즐겨찾기 추가 중 오류가 발생했습니다.');
-        }
-    }
+	        if (response.data.status === "success") {
+	            alert('즐겨찾기에 추가되었습니다.');
+	        } else {
+	            alert(response.data.message || '즐겨찾기 추가에 실패했습니다.');
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('즐겨찾기 추가 중 오류가 발생했습니다.');
+	    }
+	}
 </script>
 
 

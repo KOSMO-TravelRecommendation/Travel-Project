@@ -46,10 +46,10 @@ body {
 }
 
 .hero-section h1 {
-    font-weight: 700;
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+	font-weight: bold;
+	margin-bottom: 20px;
+	font-size: 2.8rem;
+	text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .hero-section p {
@@ -90,9 +90,7 @@ body {
 }
 
 /* Travel Cards */
-.card-section {
-    margin-top: 4rem;
-}
+
 
 .travel-card {
     border: none;
@@ -121,6 +119,7 @@ body {
 .travel-card:hover img {
     transform: scale(1.05);
 }
+
 
 .card-body {
     padding: 1.5rem;
@@ -234,4 +233,15 @@ body {
 
 .feature-box, .travel-card {
     animation: fadeIn 0.6s ease-out forwards;
+}
+
+.weather-info p {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.weather-info i {
+    width: 25px;
+    margin-right: 10px;
+    color: #007bff;
 }

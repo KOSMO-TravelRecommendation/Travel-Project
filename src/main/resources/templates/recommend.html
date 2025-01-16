@@ -49,9 +49,10 @@
 							<span th:text="${user.userName + '님 환영합니다'}">사용자님 환영합니다</span>
 						</a>
 						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-						    <a class="dropdown-item" href="#editProfileModal" data-toggle="modal" id="editProfileLink">회원 정보 수정</a>
-						    <div class="dropdown-divider"></div>
-						    <a class="dropdown-item" href="/logout">로그아웃</a>
+							<a class="dropdown-item" href="#editProfileModal" data-toggle="modal"
+								id="editProfileLink">회원 정보 수정</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/logout">로그아웃</a>
 						</div>
 					</li>
 				</ul>
@@ -60,92 +61,70 @@
 	</nav>
 
 	<div class="hero-section">
-	    <div class="container">
-	        <div class="hero-content">
-	            <h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
-	            <h1 th:if="${user != null}" th:text="${user.userName + '님을 위한 여행지 AI 추천페이지'}">
-	                사용자님, 어떤 여행을 찾고 계신가요?
-	            </h1>
-	            <p>AI 추천 페이지 테스트</p>
-	            <a href="#surveyModal" class="btn btn-primary btn-lg" id="surveyLink">AI로 여행지 추천 받기</a>
-	        </div>
-	    </div>
+		<div class="container">
+			<div class="hero-content">
+				<h1 th:if="${user == null}">당신만의 특별한 여행을 찾아드려요</h1>
+				<h1 th:if="${user != null}" th:text="${user.userName + '님을 위한 여행지 AI 추천페이지'}">
+					사용자님, 어떤 여행을 찾고 계신가요?
+				</h1>
+				<a href="#surveyModal" class="btn btn-primary btn-lg" id="surveyLink">AI로 여행지 추천 받기</a>
+			</div>
+		</div>
 	</div>
 
-	<div class="container">
-		<div class="row">
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-map-marked-alt"></i>
-					<h4>인기 여행지</h4>
-					<p>가장 추천받는 국내 여행지를 소개합니다.</p>
-					<a href="#" class="btn btn-outline-primary">더 알아보기</a>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-magic"></i>
-					<h4>AI 추천</h4>
-					<p>취향에 딱 맞는 여행지를 AI가 찾아드려요.</p>
-					<a href="#" class="btn btn-outline-primary">AI 추천 받기</a>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="feature-box">
-					<i class="fas fa-globe-americas"></i>
-					<h4>최신 여행지</h4>
-					<p>새롭게 등록된 숨은 명소를 발견하세요.</p>
-					<a href="#" class="btn btn-outline-primary">둘러보기</a>
-				</div>
+	<div class="container py-5">
+		<h3 class="text-center mb-4">최근 추천받은 여행지</h3>
+		<div id="resultsContainer" class="container py-5" style="display: block;">
+			<div class="row g-4" id="recommendationsContainer">
 			</div>
 		</div>
+	</div>
 
-		<div class="card-section">
-			<h3 class="text-center mb-4">최근 추천받은 여행지</h3>
-			<div class="row">
-				<!-- 여행지 카드 예시 -->
-				<div class="col-md-4">
-					<div class="card travel-card">
-						<img src="/img/sample1.jpg" class="card-img-top" alt="여행지 1">
-						<div class="card-body">
-							<h5 class="card-title">제주도</h5>
-							<p class="card-text">아름다운 자연과 함께하는 힐링 여행</p>
-							<a href="#" class="btn btn-primary">상세 정보</a>
-						</div>
-					</div>
+
+	<!-- FAQ 섹션 추가 -->
+	<div class="container">
+		<h3 class="text-center mb-4">자주 묻는 질문 (FAQ)</h3>
+		<div class="list-group">
+			<!-- 첫 번째 FAQ 드롭다운 -->
+			<div class="dropdown">
+				<button class="btn dropdown-toggle w-100 text-left" type="button" id="faqDropdown1"
+					data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Q 여행 추천은 어떻게 받나요?
+				</button>
+				<div class="dropdown-menu" aria-labelledby="faqDropdown1">
+					<p class="dropdown-item">여행 추천을 받기 위해서는 간단한 설문을 작성하셔야 합니다. 여행지 추천 받기를 클릭하여 설문에 응답해주세요.</p>
 				</div>
-				<div class="col-md-4">
-					<div class="card travel-card">
-						<img src="/img/sample2.jpg" class="card-img-top" alt="여행지 2">
-						<div class="card-body">
-							<h5 class="card-title">부산</h5>
-							<p class="card-text">바다와 도시의 매력이 공존하는 곳</p>
-							<a href="#" class="btn btn-primary">상세 정보</a>
-						</div>
-					</div>
+			</div>
+
+			<!-- 두 번째 FAQ 드롭다운 -->
+			<div class="dropdown">
+				<button class="btn dropdown-toggle w-100 text-left" type="button" id="faqDropdown2"
+					data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Q 추천받은 여행지는 어떻게 선택되나요?
+				</button>
+				<div class="dropdown-menu" aria-labelledby="faqDropdown2">
+					<p class="dropdown-item">추천된 여행지는 사용자의 선호도와 여행 데이터를 기반으로 AI가 자동으로 선택합니다.</p>
 				</div>
-				<div class="col-md-4">
-					<div class="card travel-card">
-						<img src="/img/sample3.jpg" class="card-img-top" alt="여행지 3">
-						<div class="card-body">
-							<h5 class="card-title">서울</h5>
-							<p class="card-text">현대와 전통이 공존하는 도시</p>
-							<a href="#" class="btn btn-primary">상세 정보</a>
-						</div>
-					</div>
+			</div>
+
+			<!-- 세 번째 FAQ 드롭다운 -->
+			<div class="dropdown">
+				<button class="btn dropdown-toggle w-100 text-left" type="button" id="faqDropdown3"
+					data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Q 로그인 없이 추천받을 수 있나요?
+				</button>
+				<div class="dropdown-menu" aria-labelledby="faqDropdown3">
+					<p class="dropdown-item">아니오, 추천을 받기 위해서는 로그인 후 설문을 작성해야 합니다. 로그인 후 설문을 작성하시면, 맞춤형 여행지 추천을 확인하실 수
+						있습니다.</p>
 				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	<footer class="footer text-center">
 		<div class="container">
 			<p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
-			<div class="social-links mt-3">
-				<a href="#" class="text-white mx-2"><i class="fab fa-facebook"></i></a>
-				<a href="#" class="text-white mx-2"><i class="fab fa-instagram"></i></a>
-				<a href="#" class="text-white mx-2"><i class="fab fa-twitter"></i></a>
-			</div>
 		</div>
 	</footer>
 
@@ -156,8 +135,38 @@
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-
 	<script>
+
+		// 여행지 추천 데이터를 불러오는 함수
+		function fetchRecommendations() {
+			// API 호출 (http://localhost:8080/api/survey/latest)
+			axios.get('http://localhost:8080/api/survey/latest')
+				.then(response => {
+					const predictions = response.data.predictions;  // API 응답 데이터에서 predictions 항목을 추출
+
+					// 추천 여행지를 HTML에 동적으로 추가
+					const recommendationsContainer = $('#recommendationsContainer');
+					recommendationsContainer.empty(); // 기존 내용을 초기화
+
+					predictions.forEach(prediction => {
+						const recommendationElement = `
+	                <div class="col-md-4">
+	                    <div class="card">
+	                        <div class="card-body">
+	                            <h5 class="card-title">${prediction.place_name}</h5>
+	                            <p class="card-text">${prediction.address}</p>
+	                        </div>
+	                    </div>
+	                </div>
+	            `;
+						recommendationsContainer.append(recommendationElement);  // 새로운 항목 추가
+					});
+				})
+				.catch(error => {
+					console.error("추천 여행지 데이터를 불러오는 데 실패했습니다.", error);
+				});
+		}
+
 		$(document).ready(function () {
 			//회원가입 모달
 			$('#signupLink').click(function (event) {
@@ -185,7 +194,7 @@
 					$('#loginModal').modal('show');
 				});
 			});
-			
+
 			//추천API 모달
 			$('#surveyLink').click(function (event) {
 				event.preventDefault();
@@ -198,17 +207,18 @@
 					$('#surveyModal').modal('show');
 				});
 			});
-			
+
 			// 마이페이지 모달
 			$('#editProfileLink').click(function (event) {
-			    event.preventDefault();
-			    $('#editProfileModal').remove();
-			    $.get('/user/mypage', function (data) {
-			        $('#modalContainer').html(data);
-			        $('#editProfileModal').modal('show');
-			    });
+				event.preventDefault();
+				$('#editProfileModal').remove();
+				$.get('/user/mypage', function (data) {
+					$('#modalContainer').html(data);
+					$('#editProfileModal').modal('show');
+				});
 			});
 		});
+
 	</script>
 </body>
 

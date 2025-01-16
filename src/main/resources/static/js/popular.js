@@ -1,4 +1,6 @@
+
 document.addEventListener('DOMContentLoaded', () => {
+
     const apiKey = decodeURIComponent(window.apiKey);
     const apiUrl = 'http://apis.data.go.kr/B551011/KorService1/areaBasedSyncList1';
     const detailApiUrl = 'http://apis.data.go.kr/B551011/KorService1/detailCommon1';

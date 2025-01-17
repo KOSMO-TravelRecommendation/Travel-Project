@@ -1,6 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
     let currentDate = new Date();
     
+	// 현재 시각 업데이트 함수
+	function updateCurrentTime() {
+	    const now = new Date();
+	    let hours = now.getHours();
+	    const minutes = String(now.getMinutes()).padStart(2, '0');
+	    const period = hours >= 12 ? 'PM' : 'AM';
+	    
+	    // 12시간 형식으로 변환
+	    hours = hours % 12;
+	    hours = hours ? hours : 12; // 0시를 12시로 표시
+	    hours = String(hours).padStart(2, '0');
+	    
+	    document.querySelector('.time-display .hours').textContent = hours;
+	    document.querySelector('.time-display .minutes').textContent = minutes;
+	    document.querySelector('.time-display .period').textContent = period;
+	}
+
+	// 1초마다 시간 업데이트
+	setInterval(updateCurrentTime, 1000);
+
+	// 초기 시간 설정
+	updateCurrentTime();
+	
     // 공휴일 정의
     const holidays = {
         '1-1': '신정',

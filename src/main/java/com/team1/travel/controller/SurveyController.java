@@ -1,5 +1,6 @@
 package com.team1.travel.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequiredArgsConstructor
 public class SurveyController {
+
+	@Value("${kakaomap.api.key}")
+	private String kakaoApiKey;
 
 	@GetMapping("/survey/form")
 	public String surveyform(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
@@ -29,6 +33,7 @@ public class SurveyController {
 	public String showResults(HttpSession session, Model model) {
 		UserVo user = (UserVo) session.getAttribute("loggedInUser");
 		model.addAttribute("user", user);
+	    model.addAttribute("kakaoMapsApiKey", kakaoApiKey);
 		return "survey/surveyResult";
 	}
 

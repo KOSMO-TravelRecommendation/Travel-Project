@@ -196,6 +196,14 @@ public class RestApiController {
             String placeName = String.valueOf(requestBody.get("placeName"));
             String address = String.valueOf(requestBody.get("address"));
 
+            // 중복 즐겨찾기 체크
+            if (favoriteService.checkDuplicateFavorite(userNo, placeName, address)) {
+                return ResponseEntity.ok(Map.of(
+                    "status", "error",
+                    "message", "이미 추가된 즐겨찾기 입니다."
+                ));
+            }
+
             // FavoriteVO 객체 생성
             FavoriteVo favoriteVo = FavoriteVo.builder()
                 .userNo(userNo)

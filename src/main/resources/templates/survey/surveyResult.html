@@ -99,7 +99,8 @@
 		}
 	</style>
 	<!-- 카카오맵 API -->
-	<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d0d50c9d3015d393b7632551eff16da0&libraries=services"></script>
+	<!-- 카카오맵 API -->
+	<script th:src="@{//dapi.kakao.com/v2/maps/sdk.js(appkey=${kakaoMapsApiKey},libraries='services')}"></script>
 </head>
 
 <body>
@@ -206,11 +207,12 @@
 				<div class="modal-body">
 					<div id="map" style="width: 100%; height: 400px;"></div>
 				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" id="directionsBtn">길 찾기</button>
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
 
+				<div class="modal-footer d-flex justify-content-center">
+					<button type="button" class="btn btn-primary mx-2" id="directionsBtn">길 찾기</button>
+					<button type="button" class="btn btn-secondary mx-2" data-dismiss="modal">닫기</button>
 				</div>
+
 			</div>
 		</div>
 	</div>
@@ -311,10 +313,12 @@
                                 <i class="fas fa-star text-warning"></i>
                                 ${place.score.toFixed(1)}점
                             </div>
-                            <button class="btn btn-outline-primary btn-sm" onclick="openMapModal('${place.address}')">상세보기</button>
-                            <button class="btn btn-outline-success btn-sm" onclick="addFavorite('${place.place_name}', '${place.address}')">
-                                즐겨찾기
-                            </button>
+							<div class="btn-group" role="group">
+							    <button class="btn btn-outline-primary btn-sm mr-2 rounded" onclick="openMapModal('${place.address}')">상세보기</button>
+							    <button class="btn btn-outline-success btn-sm rounded" onclick="addFavorite('${place.place_name}', '${place.address}')">
+							        즐겨찾기
+							    </button>
+							</div>
                         </div>
                     </div>
                 </div>
@@ -394,11 +398,11 @@
 				if (response.data.status === "success") {
 					alert('즐겨찾기에 추가되었습니다.');
 				} else {
-					alert(response.data.message || '즐겨찾기 추가에 실패했습니다.');
+					alert(response.data.message || '즐겨찾기 오류입니다...');
 				}
 			} catch (error) {
 				console.error('Error:', error);
-				alert('즐겨찾기 추가 중 오류가 발생했습니다.');
+				alert('이미 추가된 즐겨찾기 입니다.');
 			}
 		}
 	</script>

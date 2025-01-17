@@ -41,7 +41,7 @@
 						<a class="nav-link" href="/recommendation">AI 추천</a>
 					</li>
 					<li class="nav-item" th:if="${user != null}">
-						<a class="nav-link" href="/favorites">즐겨찾기</a>
+						<a class="nav-link" href="/user/favorites">즐겨찾기</a>
 					</li>
 				</ul>
 				<ul class="navbar-nav">
@@ -261,32 +261,59 @@
 
 			// 제주도 모달
 			$('#jejuLink').click(function (event) {
-				event.preventDefault();
-				$('#jejuModal').remove();
-				$.get('/local/jeju', function (data) {
-					$('#modalContainer').empty().html(data);
-					$('#jejuModal').modal('show');
-				});
+			    event.preventDefault();
+			    $('#jejuModal').remove();
+			    
+			    // local.css 동적 추가
+			    $('head').append('<link rel="stylesheet" href="/css/local.css" id="localCss">');
+			    
+			    $.get('/local/jeju', function (data) {
+			        $('#modalContainer').empty().html(data);
+			        $('#jejuModal').modal('show');
+			        
+			        // 모달이 닫힐 때 local.css 제거
+			        $('#jejuModal').on('hidden.bs.modal', function () {
+			            $('#localCss').remove();
+			        });
+			    });
 			});
 
 			// 부산 모달
 			$('#busanLink').click(function (event) {
-				event.preventDefault();
-				$('#busanModal').remove();
-				$.get('/local/busan', function (data) {
-					$('#modalContainer').empty().html(data);
-					$('#busanModal').modal('show');
-				});
+			    event.preventDefault();
+			    $('#busanModal').remove();
+			    
+			    // local.css 동적 추가
+			    $('head').append('<link rel="stylesheet" href="/css/local.css" id="localCss">');
+			    
+			    $.get('/local/busan', function (data) {
+			        $('#modalContainer').empty().html(data);
+			        $('#busanModal').modal('show');
+			        
+			        // 모달이 닫힐 때 local.css 제거
+			        $('#busanModal').on('hidden.bs.modal', function () {
+			            $('#localCss').remove();
+			        });
+			    });
 			});
 
 			// 서울 모달
 			$('#seoulLink').click(function (event) {
-				event.preventDefault();
-				$('#seoulModal').remove();
-				$.get('/local/seoul', function (data) {
-					$('#modalContainer').empty().html(data);
-					$('#seoulModal').modal('show');
-				});
+			    event.preventDefault();
+			    $('#seoulModal').remove();
+			    
+			    // local.css 동적 추가
+			    $('head').append('<link rel="stylesheet" href="/css/local.css" id="localCss">');
+			    
+			    $.get('/local/seoul', function (data) {
+			        $('#modalContainer').empty().html(data);
+			        $('#seoulModal').modal('show');
+			        
+			        // 모달이 닫힐 때 local.css 제거
+			        $('#seoulModal').on('hidden.bs.modal', function () {
+			            $('#localCss').remove();
+			        });
+			    });
 			});
 		});
 	</script>

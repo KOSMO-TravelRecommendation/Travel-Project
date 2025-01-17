@@ -24,4 +24,12 @@ public class FavoriteService {
 	public List<FavoriteVo> getUserFavorites(int userNo) {
 	    return favoriteDao.getUserFavorites(userNo);
 	}
+	
+    public int deleteFavorite(int userNo, int favoriteId) {
+        return favoriteDao.deleteFavorite(userNo, favoriteId);
+    }
+
+    public boolean checkDuplicateFavorite(int userNo, String placeName, String address) {
+        return favoriteDao.checkDuplicateFavorite(userNo, placeName, address) > 0;
+    }
 }

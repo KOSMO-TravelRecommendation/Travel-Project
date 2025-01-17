@@ -73,11 +73,41 @@ function showWeatherError(message) {
     `;
 }
 
+function getWeatherIcon(sky, precipitation) {
+    // 강수 상태 먼저 체크 (비, 눈 등이 있는 경우 우선처리)
+    switch(precipitation) {
+        case '비':
+            return 'fa-cloud-rain';
+        case '비/눈':
+            return 'fa-cloud-sleet';
+        case '눈':
+            return 'fa-snowflake';
+        case '소나기':
+            return 'fa-cloud-showers-heavy';
+        case '없음':
+            // 강수가 없는 경우 하늘 상태에 따라 처리
+            switch(sky) {
+                case '맑음':
+                    return 'fa-sun';
+                case '구름많음':
+                    return 'fa-cloud-sun';
+                case '흐림':
+                    return 'fa-cloud';
+                default:
+                    return 'fa-sun'; // 기본값
+            }
+        default:
+            return 'fa-sun'; // 기본값
+    }
+}
+
 function updateWeatherBox(data) {
     const weatherBox = document.querySelector('.weather-widget');
     if (!weatherBox) return;
     const weatherInfo = weatherBox.querySelector('.weather-info');
     if (!weatherInfo) return;
+	
+	const weatherIcon = getWeatherIcon(data.sky, data.precipitation);
 
     weatherInfo.innerHTML = `
         <div class="weather-main">
@@ -86,7 +116,7 @@ function updateWeatherBox(data) {
                 <span class="temp-unit">°C</span>
             </div>
             <div class="weather-condition">
-                <i class="fas fa-cloud"></i>
+                <i class="fas ${weatherIcon}"></i>
                 <span>${data.weather}</span>
             </div>
         </div>

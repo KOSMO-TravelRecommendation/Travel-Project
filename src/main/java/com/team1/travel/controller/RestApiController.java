@@ -187,7 +187,6 @@ public class RestApiController {
         return ResponseEntity.ok(Map.of("predictions", latestPredictions));
     }
     
-    // 즐겨찾기 추가 메서드
     @PostMapping("/favorites/add")
     public ResponseEntity<?> addFavorite(@RequestBody Map<String, Object> requestBody) {
         try {
@@ -196,14 +195,24 @@ public class RestApiController {
             String placeName = String.valueOf(requestBody.get("placeName"));
             String address = String.valueOf(requestBody.get("address"));
 
-            // FavoriteVO 객체 생성
+            // FavoriteVo 객체 생성
             FavoriteVo favoriteVo = FavoriteVo.builder()
                 .userNo(userNo)
                 .placeName(placeName)
                 .address(address)
                 .build();
 
-            // 서비스를 통해 즐겨찾기 추가
+            // 중복 체크
+            boolean isDuplicate = favoriteService.checkDuplicateFavorite(favoriteVo.getUserNo(), favoriteVo.getPlaceName(), favoriteVo.getAddress());
+            
+            if (isDuplicate) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "status", "error",
+                    "message", "이미 추가된 즐겨찾기입니다."
+                ));
+            }
+
+            // 중복되지 않으면 즐겨찾기 추가
             boolean result = favoriteService.addFavorite(favoriteVo);
 
             if (result) {
@@ -217,7 +226,7 @@ public class RestApiController {
                     "message", "즐겨찾기 추가에 실패했습니다."
                 ));
             }
-            
+
         } catch (Exception e) {
             logger.error("Error adding favorite: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
@@ -226,5 +235,6 @@ public class RestApiController {
             ));
         }
     }
+
 
 }

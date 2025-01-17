@@ -45,6 +45,32 @@ public class FavoriteController {
             ));
         }
     }
-    
-    
+
+    // 즐겨찾기 삭제
+    @DeleteMapping("/{userNo}/{favoriteId}")
+    public ResponseEntity<?> deleteFavorite(@PathVariable int userNo, @PathVariable int favoriteId) {
+        try {
+            // 즐겨찾기 삭제 처리
+            int result = favoriteService.deleteFavorite(userNo, favoriteId);
+            
+            // 삭제 성공 여부 확인
+            if (result > 0) {
+                return ResponseEntity.ok(Map.of(
+                        "status", "success",
+                        "message", "즐겨찾기가 삭제되었습니다."
+                ));
+            } else {
+                return ResponseEntity.status(404).body(Map.of(
+                        "status", "error",
+                        "message", "해당 즐겨찾기를 찾을 수 없습니다."
+                ));
+            }
+        } catch (Exception e) {
+            // 예외 처리 및 에러 로깅
+            return ResponseEntity.status(500).body(Map.of(
+                    "status", "error",
+                    "message", "즐겨찾기 삭제 중 오류가 발생했습니다: " + e.getMessage()
+            ));
+        }
+    }
 }

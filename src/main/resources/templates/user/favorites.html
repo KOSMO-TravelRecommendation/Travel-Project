@@ -111,10 +111,11 @@
                 <div class="modal-body">
                     <div id="map" style="width:100%; height:400px;"></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" id="directionsBtn" class="btn btn-primary">길찾기</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-                </div>
+                <div class="modal-footer d-flex justify-content-center">
+    <button type="button" id="directionsBtn" class="btn btn-primary mx-2">길찾기</button>
+    <button type="button" class="btn btn-secondary mx-2" data-dismiss="modal">닫기</button>
+</div>
+
             </div>
         </div>
     </div>
@@ -126,160 +127,184 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
-        let userNo = null;
+    let userNo = null;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const userNoField = document.getElementById('userNoField');
-            userNo = userNoField && userNoField.value ? parseInt(userNoField.value) : null;
+    document.addEventListener('DOMContentLoaded', function() {
+        const userNoField = document.getElementById('userNoField');
+        userNo = userNoField && userNoField.value ? parseInt(userNoField.value) : null;
 
-            console.log('현재 userNo:', userNo);
+        console.log('현재 userNo:', userNo);
 
-            if (userNo) {
-                loadFavorites();
-            } else {
-                console.warn('사용자 정보를 찾을 수 없습니다.');
-                showLoginPrompt();
-            }
+        if (userNo) {
+            loadFavorites();
+        } else {
+            console.warn('사용자 정보를 찾을 수 없습니다.');
+            showLoginPrompt();
+        }
+    });
+
+    function loadFavorites() {
+        if (userNo === null) {
+            console.warn('사용자 정보가 없습니다.');
+            return;
+        }
+
+        axios.get(`/favorites/${userNo}`)
+            .then(response => {
+                if (response.data && response.data.status === 'success' && Array.isArray(response.data.favorites)) {
+                    displayFavorites(response.data.favorites);
+                } else {
+                    throw new Error('데이터 형식이 올바르지 않습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('즐겨찾기 목록을 불러오는 중 오류가 발생했습니다:', error);
+                showErrorMessage();
+            });
+    }
+
+    // 즐겨찾기 목록 화면에 표시
+    function displayFavorites(favorites) {
+        const container = document.getElementById('favorites-container');
+        container.innerHTML = '';
+
+        if (!favorites || favorites.length === 0) {
+            container.innerHTML = `
+                <div class="text-center my-5">
+                    <h3>즐겨찾기한 장소가 없습니다.</h3>
+                    <p>관심있는 장소를 즐겨찾기해보세요!</p>
+                </div>`;
+            return;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        favorites.forEach(favorite => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 mb-4';
+
+            // 날짜 형식 변환
+            const createdAt = new Date(favorite.createdAt);
+            const formattedDate = createdAt.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            col.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">${escapeHtml(favorite.placeName)}</h5>
+                        <p class="card-text">${escapeHtml(favorite.address)}</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                등록일: ${formattedDate}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent d-flex justify-content-center">
+                    <button class="btn btn-info btn-sm" onclick="openMapModal('${favorite.address}')">
+                        상세보기
+                    </button>
+                    <button class="btn btn-danger btn-sm ml-2" onclick="deleteFavorite(${favorite.favoriteId})">
+                        삭제
+                    </button>
+                </div>
+
+                </div>
+            `;
+            row.appendChild(col);
         });
 
-        function loadFavorites() {
-            if (userNo === null) {
-                console.warn('사용자 정보가 없습니다.');
-                return;
-            }
+        container.appendChild(row);
+    }
 
-            axios.get(`/favorites/${userNo}`)
-                .then(response => {
-                    if (response.data && response.data.status === 'success' && Array.isArray(response.data.favorites)) {
-                        displayFavorites(response.data.favorites);
-                    } else {
-                        throw new Error('데이터 형식이 올바르지 않습니다.');
-                    }
-                })
-                .catch(error => {
-                    console.error('즐겨찾기 목록을 불러오는 중 오류가 발생했습니다:', error);
-                    showErrorMessage();
-                });
-        }
+    // 즐겨찾기 삭제
+    function deleteFavorite(favoriteId) {
+        if (!confirm('정말로 이 즐겨찾기를 삭제하시겠습니까?')) return;
 
-        // 즐겨찾기 목록 화면에 표시
-        function displayFavorites(favorites) {
-            const container = document.getElementById('favorites-container');
-            container.innerHTML = '';
-
-            if (!favorites || favorites.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center my-5">
-                        <h3>즐겨찾기한 장소가 없습니다.</h3>
-                        <p>관심있는 장소를 즐겨찾기해보세요!</p>
-                    </div>`;
-                return;
-            }
-
-            const row = document.createElement('div');
-            row.className = 'row';
-
-            favorites.forEach(favorite => {
-                const col = document.createElement('div');
-                col.className = 'col-md-4 mb-4';
-
-                // 날짜 형식 변환
-                const createdAt = new Date(favorite.createdAt);
-                const formattedDate = createdAt.toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-
-                col.innerHTML = `
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">${escapeHtml(favorite.placeName)}</h5>
-                            <p class="card-text">${escapeHtml(favorite.address)}</p>
-                            <p class="card-text">
-                                <small class="text-muted">
-                                    등록일: ${formattedDate}
-                                </small>
-                            </p>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <button class="btn btn-info btn-sm" onclick="openMapModal('${favorite.address}')">
-                                상세보기
-                            </button>
-                        </div>
-                    </div>
-                `;
-                row.appendChild(col);
+        axios.delete(`/favorites/${userNo}/${favoriteId}`)
+            .then(response => {
+                if (response.data && response.data.status === 'success') {
+                    alert('즐겨찾기가 삭제되었습니다.');
+                    loadFavorites(); // 즐겨찾기 목록을 다시 불러옴
+                } else {
+                    alert('삭제에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('즐겨찾기 삭제 중 오류가 발생했습니다:', error);
+                alert('삭제 중 문제가 발생했습니다.');
             });
+    }
 
-            container.appendChild(row);
-        }
+    // XSS 방지를 위한 HTML 이스케이프 함수
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-        // XSS 방지를 위한 HTML 이스케이프 함수
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
+    // 지도 모달 열기
+    function openMapModal(address) {
+        $('#mapModal').modal('show');
 
-        // 지도 모달 열기
-        function openMapModal(address) {
-            $('#mapModal').modal('show');
+        $('#mapModal').on('shown.bs.modal', function () {
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = '';
 
-            $('#mapModal').on('shown.bs.modal', function () {
-                const mapContainer = document.getElementById('map');
-                mapContainer.innerHTML = '';
+            const mapOptions = {
+                center: new kakao.maps.LatLng(37.5665, 126.9780),
+                level: 4
+            };
 
-                const mapOptions = {
-                    center: new kakao.maps.LatLng(37.5665, 126.9780),
-                    level: 4
-                };
+            const map = new kakao.maps.Map(mapContainer, mapOptions);
+            const geocoder = new kakao.maps.services.Geocoder();
 
-                const map = new kakao.maps.Map(mapContainer, mapOptions);
-                const geocoder = new kakao.maps.services.Geocoder();
+            geocoder.addressSearch(address, function (result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    map.setCenter(coords);
 
-                geocoder.addressSearch(address, function (result, status) {
-                    if (status === kakao.maps.services.Status.OK) {
-                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-                        map.setCenter(coords);
+                    const marker = new kakao.maps.Marker({
+                        map: map,
+                        position: coords
+                    });
 
-                        const marker = new kakao.maps.Marker({
-                            map: map,
-                            position: coords
-                        });
+                    const infowindow = new kakao.maps.InfoWindow({
+                        content: `<div style="padding:5px; text-align: center;">${address}</div>`
+                    });
+                    infowindow.open(map, marker);
 
-                        const infowindow = new kakao.maps.InfoWindow({
-                            content: `<div style="padding:5px; text-align: center;">${address}</div>`
-                        });
-                        infowindow.open(map, marker);
+                    const bounds = new kakao.maps.LatLngBounds();
+                    bounds.extend(coords);
+                    map.setBounds(bounds);
 
-                        const bounds = new kakao.maps.LatLngBounds();
-                        bounds.extend(coords);
-                        map.setBounds(bounds);
-
-                        document.getElementById('directionsBtn').onclick = () => {
-                            window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
-                        };
-                    } else {
-                        alert('해당 주소를 찾을 수 없습니다.');
-                    }
-                });
+                    document.getElementById('directionsBtn').onclick = () => {
+                        window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
+                    };
+                } else {
+                    alert('해당 주소를 찾을 수 없습니다.');
+                }
             });
-        }
+        });
+    }
 
-        // 에러 메시지 표시
-        function showErrorMessage() {
-            const container = document.getElementById('favorites-container');
-            container.innerHTML = `
-                <div class="alert alert-danger text-center my-5" role="alert">
-                    즐겨찾기 목록을 불러오는 중 문제가 발생했습니다. 
-                    <br>잠시 후 다시 시도해주세요.
-                </div>`;
-        }
-    </script>
+    // 에러 메시지 표시
+    function showErrorMessage() {
+        const container = document.getElementById('favorites-container');
+        container.innerHTML = `
+            <div class="alert alert-danger text-center my-5" role="alert">
+                즐겨찾기 목록을 불러오는 중 문제가 발생했습니다. 
+                <br>잠시 후 다시 시도해주세요.
+            </div>`;
+    }
+</script>
+
 </body>
 
 </html>

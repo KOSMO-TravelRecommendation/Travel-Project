@@ -202,11 +202,12 @@
                 <div class="modal-body">
                     <div id="map" style="width: 100%; height: 400px;"></div>
                 </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="directionsBtn">길 찾기</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-                    
-                </div>
+                
+                <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn btn-primary mx-2" id="directionsBtn">길 찾기</button>
+    <button type="button" class="btn btn-secondary mx-2" data-dismiss="modal">닫기</button>
+</div>
+                
             </div>
         </div>
     </div>
@@ -390,11 +391,11 @@
 	        if (response.data.status === "success") {
 	            alert('즐겨찾기에 추가되었습니다.');
 	        } else {
-	            alert(response.data.message || '즐겨찾기 추가에 실패했습니다.');
+	            alert(response.data.message || '즐겨찾기 오류입니다...');
 	        }
 	    } catch (error) {
 	        console.error('Error:', error);
-	        alert('즐겨찾기 추가 중 오류가 발생했습니다.');
+	        alert('이미 추가된 즐겨찾기 입니다.');
 	    }
 	}
 </script>

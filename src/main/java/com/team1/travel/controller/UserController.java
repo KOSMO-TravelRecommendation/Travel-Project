@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.team1.travel.model.UserVo;
 import com.team1.travel.service.UserService;
@@ -24,6 +26,9 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class UserController {
 
+	 @Value("${kakaomap.api.key}")
+	 private String kakaoApiKey;
+	
     @Autowired
     private UserService userService;
 
@@ -173,15 +178,17 @@ public class UserController {
     }
     
     // 즐겨 찾기
-    @GetMapping("/favorites")
-    public String favorite(HttpSession session,Model model) {
-        UserVo user = (UserVo) session.getAttribute("loggedInUser");
-        if (user == null) {
-            return "redirect:/";
-        }
-        model.addAttribute("user", user);
-        return "user/favorites";
-    }
+	@GetMapping("/user/favorites")
+	public String favorites(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+	    UserVo user = (UserVo) session.getAttribute("loggedInUser");
+	    if (user == null) {
+	        redirectAttributes.addFlashAttribute("message", "로그인이 필요한 서비스입니다.");
+	        return "redirect:/"; // 홈으로 리다이렉트
+	    }
+	    model.addAttribute("user", user);
+	    model.addAttribute("kakaoMapsApiKey", kakaoApiKey);
+	    return "user/favorites";
+	}
 
     
     // 회원가입

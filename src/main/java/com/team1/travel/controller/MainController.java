@@ -33,6 +33,9 @@ public class MainController {
 	 @Value("${weather.api.key}")
 	 private String weatherApiKey;
 	 
+	 @Value("${kakaomap.api.key}")
+	 private String kakaoApiKey;
+	 
 	// index page
 	@GetMapping("/")
 	public String index(Model model, HttpSession session) {
@@ -113,5 +116,7 @@ public class MainController {
 		return "recommend";
 	}
 
+
+	
 
 }

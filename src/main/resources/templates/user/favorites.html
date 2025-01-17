@@ -2,94 +2,284 @@
 <html lang="ko">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>여행지 추천 플랫폼</title>
-	<!-- Bootstrap 4 CSS -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-	<link rel="stylesheet" href="/css/index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행지 추천 플랫폼</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/index.css">
 </head>
+<style>
+#map {
+        width: 100%;
+        height: 400px; /* 모달 크기에 맞춰 설정 */
+        margin: 0 auto; /* 지도 중앙 정렬 */
+    }
+
+    .modal-lg {
+        max-width: 90%; /* 모달 크기 조정 */
+        }
+
+</style>
+ <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d0d50c9d3015d393b7632551eff16da0&libraries=services"></script>
 
 <body>
-	<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-		<div class="container">
-			<a class="navbar-brand" href="/">
-				<strong>Travel Picker</strong>
-			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"
-				aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
 
-			<div class="collapse navbar-collapse" id="navbar">
-				<ul class="navbar-nav mr-auto">
-					<li class="nav-item">
-						<a class="nav-link" href="/">홈</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="/recommendation">AI 추천</a>
-					</li>
-					<li class="nav-item active" th:if="${user != null}">
-						<a class="nav-link" href="/favorites">즐겨찾기</a>
-					</li>
-				</ul>
-				<!-- 로그인하지 않은 경우 -->
-				<ul class="navbar-nav">
-					<li class="nav-item" th:if="${user == null}">
-						<a class="nav-link" href="#signupModal" data-toggle="modal" id="signupLink">회원가입</a>
-					</li>
-					<li class="nav-item" th:if="${user == null}">
-						<a class="btn btn-primary" href="#loginModal" data-toggle="modal" id="loginLink">로그인</a>
-					</li>
-					<!-- 로그인한 경우 -->
-					<li class="nav-item dropdown" th:if="${user != null}">
-						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<span th:text="${user.userName + '님 환영합니다'}">사용자님 환영합니다</span>
-						</a>
-						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<a class="dropdown-item" href="/mypage">마이페이지</a>
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="/logout">로그아웃</a>
-						</div>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</nav>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <strong>Travel Picker</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"
+                aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-	<div class="hero-section">
-	    <div class="container">
-	        <div class="hero-content">
-	            <h1 th:if="${user == null}"></h1>
-	            <h1 th:if="${user != null}" th:text="${user.userName + '님의 즐겨찾기 목록 입니다.'}">
-	                사용자님, 어떤 여행을 찾고 계신가요?
-	            </h1>
-	            <p>최근 즐겨찾기 하신 5개 항목을 보여드릴게요.</p>
-	            <a href="/" class="btn btn-primary btn-lg">홈으로 돌아가기</a>
-	        </div>
-	    </div>
-	</div>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">홈</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommendation">AI 추천</a>
+                    </li>
+                    <li class="nav-item active" th:if="${user != null}">
+                        <a class="nav-link" href="/favorites">즐겨찾기</a>
+                    </li>
+                </ul>
+                <!-- 로그인하지 않은 경우 -->
+                <ul class="navbar-nav">
+                    <li class="nav-item" th:if="${user == null}">
+                        <a class="nav-link" href="#signupModal" data-toggle="modal" id="signupLink">회원가입</a>
+                    </li>
+                    <li class="nav-item" th:if="${user == null}">
+                        <a class="btn btn-primary" href="#loginModal" data-toggle="modal" id="loginLink">로그인</a>
+                    </li>
+                    <!-- 로그인한 경우 -->
+                    <li class="nav-item dropdown" th:if="${user != null}">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span th:text="${user.userName + '님 환영합니다'}">사용자님 환영합니다</span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/mypage">마이페이지</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/logout">로그아웃</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-	
+    <!-- userNo를 저장할 hidden 필드 추가 -->
+    <input type="hidden" id="userNoField" th:value="${user != null ? user.userNo : ''}" />
 
-	<footer class="footer text-center">
-		<div class="container">
-			<p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
-		</div>
-	</footer>
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 th:if="${user == null}"></h1>
+                <h1 th:if="${user != null}" th:text="${user.userName + '님의 즐겨찾기 목록 입니다.'}"></h1>
+                <a href="/" class="btn btn-primary btn-lg">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
 
-	<div id="modalContainer"></div>
+    <div id="favorites-container" class="container mt-5">
+        <!-- 즐겨찾기 항목들이 여기에 동적으로 추가됩니다. -->
+    </div>
 
-	<!-- jQuery, Popper.js, Bootstrap JS -->
-	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <footer class="footer text-center">
+        <div class="container">
+            <p>&copy; 2024 Travel Picker. All Rights Reserved.</p>
+        </div>
+    </footer>
 
-	<script>
-		
-	</script>
+    <div id="modalContainer"></div>
+
+    <!-- 지도 모달 -->
+    <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">지도 상세보기</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="map" style="width:100%; height:400px;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="directionsBtn" class="btn btn-primary">길찾기</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Popper.js, Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        let userNo = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const userNoField = document.getElementById('userNoField');
+            userNo = userNoField && userNoField.value ? parseInt(userNoField.value) : null;
+
+            console.log('현재 userNo:', userNo);
+
+            if (userNo) {
+                loadFavorites();
+            } else {
+                console.warn('사용자 정보를 찾을 수 없습니다.');
+                showLoginPrompt();
+            }
+        });
+
+        function loadFavorites() {
+            if (userNo === null) {
+                console.warn('사용자 정보가 없습니다.');
+                return;
+            }
+
+            axios.get(`/favorites/${userNo}`)
+                .then(response => {
+                    if (response.data && response.data.status === 'success' && Array.isArray(response.data.favorites)) {
+                        displayFavorites(response.data.favorites);
+                    } else {
+                        throw new Error('데이터 형식이 올바르지 않습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('즐겨찾기 목록을 불러오는 중 오류가 발생했습니다:', error);
+                    showErrorMessage();
+                });
+        }
+
+        // 즐겨찾기 목록 화면에 표시
+        function displayFavorites(favorites) {
+            const container = document.getElementById('favorites-container');
+            container.innerHTML = '';
+
+            if (!favorites || favorites.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center my-5">
+                        <h3>즐겨찾기한 장소가 없습니다.</h3>
+                        <p>관심있는 장소를 즐겨찾기해보세요!</p>
+                    </div>`;
+                return;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            favorites.forEach(favorite => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+
+                // 날짜 형식 변환
+                const createdAt = new Date(favorite.createdAt);
+                const formattedDate = createdAt.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                col.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">${escapeHtml(favorite.placeName)}</h5>
+                            <p class="card-text">${escapeHtml(favorite.address)}</p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    등록일: ${formattedDate}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-info btn-sm" onclick="openMapModal('${favorite.address}')">
+                                상세보기
+                            </button>
+                        </div>
+                    </div>
+                `;
+                row.appendChild(col);
+            });
+
+            container.appendChild(row);
+        }
+
+        // XSS 방지를 위한 HTML 이스케이프 함수
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 지도 모달 열기
+        function openMapModal(address) {
+            $('#mapModal').modal('show');
+
+            $('#mapModal').on('shown.bs.modal', function () {
+                const mapContainer = document.getElementById('map');
+                mapContainer.innerHTML = '';
+
+                const mapOptions = {
+                    center: new kakao.maps.LatLng(37.5665, 126.9780),
+                    level: 4
+                };
+
+                const map = new kakao.maps.Map(mapContainer, mapOptions);
+                const geocoder = new kakao.maps.services.Geocoder();
+
+                geocoder.addressSearch(address, function (result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                        map.setCenter(coords);
+
+                        const marker = new kakao.maps.Marker({
+                            map: map,
+                            position: coords
+                        });
+
+                        const infowindow = new kakao.maps.InfoWindow({
+                            content: `<div style="padding:5px; text-align: center;">${address}</div>`
+                        });
+                        infowindow.open(map, marker);
+
+                        const bounds = new kakao.maps.LatLngBounds();
+                        bounds.extend(coords);
+                        map.setBounds(bounds);
+
+                        document.getElementById('directionsBtn').onclick = () => {
+                            window.open(`https://map.kakao.com/link/to/${address},${result[0].y},${result[0].x}`, '_blank');
+                        };
+                    } else {
+                        alert('해당 주소를 찾을 수 없습니다.');
+                    }
+                });
+            });
+        }
+
+        // 에러 메시지 표시
+        function showErrorMessage() {
+            const container = document.getElementById('favorites-container');
+            container.innerHTML = `
+                <div class="alert alert-danger text-center my-5" role="alert">
+                    즐겨찾기 목록을 불러오는 중 문제가 발생했습니다. 
+                    <br>잠시 후 다시 시도해주세요.
+                </div>`;
+        }
+    </script>
 </body>
 
 </html>

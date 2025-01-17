@@ -1,24 +1,17 @@
 package com.team1.travel.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.team1.travel.model.FavoriteVo;
-import com.team1.travel.service.FavoriteService;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5000"})
@@ -28,9 +21,6 @@ public class RestApiController {
     private static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
     private Map<String, Object> latestSurveyData;
     private List<Map<String, Object>> latestPredictions;
-    
-    @Autowired
-    private FavoriteService favoriteService;
     
     @PostMapping("/submit")
     public ResponseEntity<?> submitSurvey(@RequestBody Map<String, Object> requestBody) {
@@ -185,64 +175,5 @@ public class RestApiController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(Map.of("predictions", latestPredictions));
-    }
-    
-    // 즐겨찾기 추가 메서드
-    @PostMapping("/favorites/add")
-    public ResponseEntity<?> addFavorite(@RequestBody Map<String, Object> requestBody) {
-        try {
-            // 요청 본문에서 필요한 데이터 추출
-            int userNo = Integer.parseInt(String.valueOf(requestBody.get("userNo")));
-            String placeName = String.valueOf(requestBody.get("placeName"));
-            String address = String.valueOf(requestBody.get("address"));
-
-            // FavoriteVO 객체 생성
-            FavoriteVo favoriteVo = FavoriteVo.builder()
-                .userNo(userNo)
-                .placeName(placeName)
-                .address(address)
-                .build();
-
-            // 서비스를 통해 즐겨찾기 추가
-            boolean result = favoriteService.addFavorite(favoriteVo);
-
-            if (result) {
-                return ResponseEntity.ok(Map.of(
-                    "status", "success",
-                    "message", "즐겨찾기에 추가되었습니다."
-                ));
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "status", "error",
-                    "message", "즐겨찾기 추가에 실패했습니다."
-                ));
-            }
-            
-        } catch (Exception e) {
-            logger.error("Error adding favorite: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "status", "error",
-                "message", "즐겨찾기 추가 중 오류가 발생했습니다: " + e.getMessage()
-            ));
-        }
-    }
-
-    // 사용자의 최근 즐겨찾기 목록 조회 메서드
-    @GetMapping("/favorites/{userNo}")
-    public ResponseEntity<?> getUserFavorites(@PathVariable int userNo) {
-        try {
-            List<FavoriteVo> favorites = favoriteService.getUserFavorites(userNo);
-            
-            return ResponseEntity.ok(Map.of(
-                "status", "success",
-                "favorites", favorites
-            ));
-        } catch (Exception e) {
-            logger.error("Error retrieving user favorites: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "status", "error",
-                "message", "즐겨찾기 조회 중 오류가 발생했습니다: " + e.getMessage()
-            ));
-        }
     }
 }
